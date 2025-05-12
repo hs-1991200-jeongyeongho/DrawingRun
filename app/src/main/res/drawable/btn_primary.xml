@@ -1,0 +1,14 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false">
+        <shape android:shape="rectangle">
+            <solid android:color="#B0BEC5" />
+            <corners android:radius="24dp" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#00796B" /> <!-- 메인 색상 (딥그린 등) -->
+            <corners android:radius="24dp" />
+        </shape>
+    </item>
+</selector>

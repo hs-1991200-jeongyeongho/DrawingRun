@@ -24,106 +24,101 @@
             android:layout_gravity="center"
             android:layout_marginBottom="16dp" />
 
-        <!-- 카드 항목: 이름 -->
+        <!-- 항목 카드들 -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
             app:cardCornerRadius="16dp"
             app:cardElevation="2dp">
-
             <TextView
                 android:id="@+id/tvUserName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="16dp"
                 android:text="이름: 홍길동"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:fontFamily="@font/spoqa_han_sans_regular" />
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- 카드 항목: 나이 -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
             app:cardCornerRadius="16dp"
             app:cardElevation="2dp">
-
             <TextView
                 android:id="@+id/tvUserAge"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="16dp"
                 android:text="나이: 20세"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:fontFamily="@font/spoqa_han_sans_regular" />
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- 카드 항목: 키 -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
             app:cardCornerRadius="16dp"
             app:cardElevation="2dp">
-
             <TextView
                 android:id="@+id/tvUserHeight"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="16dp"
                 android:text="키: 170cm"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:fontFamily="@font/spoqa_han_sans_regular" />
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- 카드 항목: 몸무게 -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
             app:cardCornerRadius="16dp"
             app:cardElevation="2dp">
-
             <TextView
                 android:id="@+id/tvUserWeight"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="16dp"
                 android:text="몸무게: 60kg"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:fontFamily="@font/spoqa_han_sans_regular" />
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- 카드 항목: 누적 거리 -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
             app:cardCornerRadius="16dp"
             app:cardElevation="2dp">
-
             <TextView
                 android:id="@+id/tvTotalDistance"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="16dp"
                 android:text="누적 거리: 5.2 km"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:fontFamily="@font/spoqa_han_sans_regular" />
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- 카드 항목: 도형 수 -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="20dp"
             app:cardCornerRadius="16dp"
             app:cardElevation="2dp">
-
             <TextView
                 android:id="@+id/tvShapeCount"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="16dp"
                 android:text="만든 도형 수: 3개"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:fontFamily="@font/spoqa_han_sans_regular" />
         </com.google.android.material.card.MaterialCardView>
 
         <!-- 편집 버튼 -->
@@ -131,6 +126,9 @@
             android:id="@+id/btnEditProfile"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="프로필 편집" />
+            android:text="프로필 편집"
+            android:fontFamily="@font/spoqa_han_sans_bold"
+            android:textColor="@android:color/white"
+            android:backgroundTint="@android:color/holo_blue_dark" />
     </LinearLayout>
 </ScrollView>
