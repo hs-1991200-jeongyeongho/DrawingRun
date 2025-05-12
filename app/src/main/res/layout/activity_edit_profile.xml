@@ -1,0 +1,13 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:padding="24dp"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <EditText android:id="@+id/etName" android:hint="이름" android:layout_width="match_parent" android:layout_height="wrap_content" />
+    <EditText android:id="@+id/etAge" android:hint="나이" android:inputType="number" android:layout_width="match_parent" android:layout_height="wrap_content" />
+    <EditText android:id="@+id/etHeight" android:hint="키 (cm)" android:inputType="number" android:layout_width="match_parent" android:layout_height="wrap_content" />
+    <EditText android:id="@+id/etWeight" android:hint="몸무게 (kg)" android:inputType="number" android:layout_width="match_parent" android:layout_height="wrap_content" />
+
+    <Button android:id="@+id/btnSaveProfile" android:text="저장하기" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="24dp" />
+</LinearLayout>
