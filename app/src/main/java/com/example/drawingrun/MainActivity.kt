@@ -89,7 +89,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 5.dp) // 로고와 살짝 띄우기
+                .padding(bottom = 5.dp)
         )
 
         // 경로 선택 버튼

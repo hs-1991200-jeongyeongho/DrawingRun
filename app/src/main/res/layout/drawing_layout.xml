@@ -46,7 +46,7 @@
 
         <!-- 적용 버튼 (추후 사용) -->
         <Button
-            android:id="@+id/apply_button"
+            android:id="@+id/btn_predict"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
