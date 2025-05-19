@@ -1,4 +1,3 @@
-// 통합버전 RunningActivity.kt
 package com.example.drawingrun
 
 import android.Manifest
@@ -8,9 +7,10 @@ import android.location.Location
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.ViewTreeObserver
 import android.widget.Button
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -21,7 +21,6 @@ import com.google.android.gms.maps.model.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlin.math.roundToInt
-import android.widget.Toast
 
 class RunningActivity : BaseActivity(), OnMapReadyCallback {
 
@@ -62,10 +61,10 @@ class RunningActivity : BaseActivity(), OnMapReadyCallback {
         calorieText = findViewById(R.id.calorie_text)
         pauseButton = findViewById(R.id.pause_button)
         endButton = findViewById(R.id.end_button)
-        val startButton = findViewById<Button>(R.id.start_button) // ← start 버튼 연결
+        val startButton = findViewById<Button>(R.id.start_button)
 
         var hasStarted = false
-        isRunning = false // ← 자동 시작 방지
+        isRunning = false
 
         startButton.setOnClickListener {
             if (!hasStarted) {
@@ -88,7 +87,6 @@ class RunningActivity : BaseActivity(), OnMapReadyCallback {
         setupLocationUpdates()
         startTimer()
     }
-
 
     private fun onRunEnded() {
         val endTimeMillis = System.currentTimeMillis()
@@ -116,14 +114,11 @@ class RunningActivity : BaseActivity(), OnMapReadyCallback {
                 val calories = mets * weight * durationHours
                 val timeFormatted = String.format("%.0f분 %.0f초", durationSeconds / 60, durationSeconds % 60)
 
-                // 👉 요약 팝업 띄우기
                 val dialog = WorkoutSummaryDialog(this, timeFormatted, distanceKm, calories) {
-                    // [확인] 눌렀을 때 → WorkoutResultActivity로 이동
                     val intent = Intent(this, WorkoutResultActivity::class.java).apply {
                         putExtra("calories", calories)
                         putExtra("time", timeFormatted)
                         putExtra("distance", distanceKm)
-
                     }
                     startActivity(intent)
                     finish()
@@ -132,7 +127,6 @@ class RunningActivity : BaseActivity(), OnMapReadyCallback {
             }
         }
     }
-
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
@@ -153,9 +147,17 @@ class RunningActivity : BaseActivity(), OnMapReadyCallback {
             mMap.addPolyline(polylineOptions)
 
             val boundsBuilder = LatLngBounds.Builder()
-            for (point in selectedRoutePoints) boundsBuilder.include(point)
+            selectedRoutePoints.forEach { boundsBuilder.include(it) }
             val bounds = boundsBuilder.build()
-            mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 150))
+
+            val mapFragment = supportFragmentManager.findFragmentById(R.id.running_map) as SupportMapFragment
+            val mapView = mapFragment.view
+            mapView?.viewTreeObserver?.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    mapView.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 150))
+                }
+            })
         } else {
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(37.6067, 127.0232), 14f))
         }

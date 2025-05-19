@@ -23,38 +23,49 @@ class DrawingBottomSheetFragment : DialogFragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // 그림판 레이아웃을 인플레이트
         val rootView = inflater.inflate(R.layout.drawing_layout, container, false)
 
-        // DrawingView 연결
         drawingView = rootView.findViewById(R.id.drawing_view)
-
-        // 모델 로드
         interpreter = Interpreter(loadModelFile(requireContext()))
 
-        // 리셋 버튼 클릭 시 그림 초기화
         val resetButton = rootView.findViewById<Button>(R.id.reset_button)
+        val btnClose = rootView.findViewById<ImageButton>(R.id.btn_close)
+        val btnPredict = rootView.findViewById<Button>(R.id.btn_predict) // ✅ 선언 추가
+
         resetButton.setOnClickListener {
             drawingView.clearDrawing()
         }
 
-        // 닫기 버튼 클릭 시 다이얼로그 종료
-        val btnClose = rootView.findViewById<ImageButton>(R.id.btn_close)
         btnClose.setOnClickListener {
             dismiss()
         }
 
-        // 적용(예측) 버튼 클릭 시 모델 추론 수행
-        val btnPredict = rootView.findViewById<Button>(R.id.btn_predict)
         btnPredict.setOnClickListener {
             val result = drawingView.predictWithModel(interpreter)
-            Toast.makeText(requireContext(), "예측 결과: $result", Toast.LENGTH_SHORT).show()
+
+            // 예측 결과 다이얼로그
+            androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setTitle("예측 결과 확인")
+                .setMessage("그리신 그림이 \"$result\"이 맞나요?")
+                .setPositiveButton("맞아요") { dialog, _ ->
+                    // 🔥 결과를 DrawingActivity로 전달
+                    parentFragmentManager.setFragmentResult(
+                        "prediction_result",
+                        Bundle().apply { putString("shape", result) }
+                    )
+                    dialog.dismiss()
+                    dismiss() // 이 다이얼로그(Fragment)도 닫기
+                }
+                .setNegativeButton("아니오") { dialog, _ ->
+                    Toast.makeText(requireContext(), "다시 그려주세요.", Toast.LENGTH_SHORT).show()
+                    dialog.dismiss()
+                }
+                .show()
         }
 
         return rootView
     }
 
-    // 모델 파일(.tflite)을 assets에서 로드
     private fun loadModelFile(context: Context): MappedByteBuffer {
         val fileDescriptor = context.assets.openFd("quickdraw_model.tflite")
         val inputStream = FileInputStream(fileDescriptor.fileDescriptor)

@@ -17,45 +17,42 @@
         android:theme="@style/Theme.DrawingRun"
         tools:targetApi="31">
 
-        <!-- ✅ 테마 추가 -->
+        <!-- ✅ 모든 액티비티에 Material 테마 적용 -->
         <activity android:name=".RegisterActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+            android:theme="@style/Theme.DrawingRun" />
 
         <activity android:name=".ProfileActivity" />
-
 
         <activity
             android:name=".UserInfoActivity"
             android:exported="false"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+            android:theme="@style/Theme.DrawingRun" />
 
         <activity
             android:name=".LoginActivity"
             android:exported="true"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-        </activity>
+            android:theme="@style/Theme.DrawingRun" />
 
         <activity android:name=".EditProfileActivity" />
 
         <activity
             android:name=".MapsActivity"
             android:exported="true"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+            android:theme="@style/Theme.DrawingRun" />
 
         <activity
             android:name=".DrawingActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+            android:theme="@style/Theme.DrawingRun" />
 
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.DrawingRun">
-        </activity>
+            android:theme="@style/Theme.DrawingRun" />
 
         <activity
             android:name=".RunningActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+            android:theme="@style/Theme.DrawingRun" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -63,11 +60,11 @@
 
         <activity
             android:name=".WorkoutResultActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+            android:theme="@style/Theme.DrawingRun" />
 
         <activity
             android:name=".RouteUploadActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+            android:theme="@style/Theme.DrawingRun" />
 
         <activity
             android:name=".SplashActivity"
