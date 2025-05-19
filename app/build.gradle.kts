@@ -78,6 +78,7 @@ dependencies {
     implementation ("org.tensorflow:tensorflow-lite:2.16.1")
     implementation("org.tensorflow:tensorflow-lite:2.13.0")
     implementation ("org.tensorflow:tensorflow-lite-task-vision:0.4.0")
+    implementation ("androidx.core:core-splashscreen:1.0.1")
 
 
 }

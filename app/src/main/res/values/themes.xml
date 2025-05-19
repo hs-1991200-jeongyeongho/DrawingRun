@@ -12,4 +12,11 @@
 
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
     </style>
+
+    <style name="Theme.DrawingRun.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/white</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/drawing_run_logo</item>
+        <item name="windowSplashScreenAnimationDuration">1000</item> <!-- 1초 -->
+        <item name="postSplashScreenTheme">@style/Theme.DrawingRun</item> <!-- 기존 앱 테마로 전환 -->
+    </style>
 </resources>
