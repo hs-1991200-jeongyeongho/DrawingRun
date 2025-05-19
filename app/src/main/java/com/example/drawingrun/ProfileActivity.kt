@@ -1,9 +1,15 @@
 package com.example.drawingrun
 
+import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -24,12 +30,23 @@ class ProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
 
+        // 툴바 설정
+        val toolbar = findViewById<Toolbar>(R.id.profileToolbar)
+        setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
         tvName = findViewById(R.id.tvUserName)
         tvAge = findViewById(R.id.tvUserAge)
         tvHeight = findViewById(R.id.tvUserHeight)
         tvWeight = findViewById(R.id.tvUserWeight)
         tvDistance = findViewById(R.id.tvTotalDistance)
         tvShapes = findViewById(R.id.tvShapeCount)
+
+        val editButton = findViewById<Button>(R.id.btnEditProfile)
+        editButton.setOnClickListener {
+            val intent = Intent(this, EditProfileActivity::class.java)
+            startActivity(intent)
+        }
 
         loadUserProfile()
     }
@@ -53,12 +70,48 @@ class ProfileActivity : AppCompatActivity() {
                     tvWeight.text = "몸무게: $weight kg"
                     tvDistance.text = "누적 달린 거리: $distance km"
                     tvShapes.text = "만든 도형 수: $shapes"
-
-
                 }
             }
             .addOnFailureListener {
                 tvName.text = "불러오기 실패"
             }
+    }
+
+
+    // 메뉴 연결
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_profile, menu)
+        return true
+    }
+
+    // 로그아웃 메뉴 클릭 처리
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed() // 또는 finish()
+                true
+            }
+            R.id.action_logout -> {
+                showLogoutDialog()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+
+
+    // 로그아웃 확인 다이얼로그
+    private fun showLogoutDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("로그아웃")
+            .setMessage("정말 로그아웃하시겠습니까?")
+            .setPositiveButton("확인") { _, _ ->
+                FirebaseAuth.getInstance().signOut()
+                startActivity(Intent(this, LoginActivity::class.java))
+                finish()
+            }
+            .setNegativeButton("취소", null)
+            .show()
     }
 }

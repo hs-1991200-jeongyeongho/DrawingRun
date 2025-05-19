@@ -31,12 +31,12 @@ class EditProfileActivity : AppCompatActivity() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
         val name = etName.text.toString().trim()
-        val age = etAge.text.toString().trim()
-        val height = etHeight.text.toString().trim()
-        val weight = etWeight.text.toString().trim()
+        val age = etAge.text.toString().trim().toIntOrNull()
+        val height = etHeight.text.toString().trim().toDoubleOrNull()
+        val weight = etWeight.text.toString().trim().toDoubleOrNull()
 
-        if (name.isEmpty() || age.isEmpty() || height.isEmpty() || weight.isEmpty()) {
-            Toast.makeText(this, "모든 항목을 입력해주세요", Toast.LENGTH_SHORT).show()
+        if (name.isEmpty() || age == null || height == null || weight == null) {
+            Toast.makeText(this, "모든 항목을 올바르게 입력해주세요", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -60,4 +60,5 @@ class EditProfileActivity : AppCompatActivity() {
                 Toast.makeText(this, "저장 실패", Toast.LENGTH_SHORT).show()
             }
     }
+
 }
