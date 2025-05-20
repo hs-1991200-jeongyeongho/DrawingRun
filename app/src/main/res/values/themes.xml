@@ -52,4 +52,13 @@
         <item name="android:paddingEnd">12dp</item>
     </style>
 
+    <style name="PopupActivityTheme" parent="Theme.MaterialComponents.Dialog">
+        <item name="android:windowMinWidthMajor">90%</item>
+        <item name="android:windowMinWidthMinor">90%</item>
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowCloseOnTouchOutside">false</item>
+    </style>
+
+
 </resources>

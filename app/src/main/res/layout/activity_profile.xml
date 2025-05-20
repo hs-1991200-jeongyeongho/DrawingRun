@@ -1,29 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#FDFDFD">
 
-    <!-- ✅ 상단 툴바 -->
+    <!-- Toolbar -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/profileToolbar"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        android:layout_height="wrap_content"
+        android:background="#FF670C"
+        android:elevation="4dp"
         app:title="내 프로필"
         app:titleTextColor="@android:color/white"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
-    <!-- ✅ 기존 ScrollView (툴바 아래에 배치) -->
     <ScrollView
         android:id="@+id/profileScrollView"
         android:layout_below="@id/profileToolbar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="?android:attr/windowBackground">
+        android:fillViewport="true">
 
-        <!-- 여기에 네 기존 LinearLayout 전체를 그대로 유지하면 됨 -->
-        <!-- 기존 LinearLayout 시작 -->
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
@@ -31,35 +30,29 @@
             android:padding="24dp"
             android:gravity="center_horizontal">
 
-            <!-- 프로필 이미지 -->
+            <!-- Profile Image -->
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/profileImageView"
                 android:layout_width="120dp"
                 android:layout_height="120dp"
-                android:scaleType="centerCrop"
                 android:src="@drawable/ic_profile_default"
                 android:contentDescription="프로필 이미지"
                 app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
-                android:layout_gravity="center"
-                android:layout_marginBottom="16dp" />
+                android:scaleType="centerCrop"
+                android:layout_marginBottom="12dp" />
 
-            <!-- 항목 카드들 -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
+            <!-- Name Text -->
+            <TextView
+                android:id="@+id/tvUserName"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp">
-                <TextView
-                    android:id="@+id/tvUserName"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp"
-                    android:text="이름: 홍길동"
-                    android:textSize="16sp"
-                    android:fontFamily="@font/spoqa_han_sans_regular" />
-            </com.google.android.material.card.MaterialCardView>
+                android:text="홍길동"
+                android:textSize="20sp"
+                android:textColor="#212121"
+                android:fontFamily="@font/spoqa_han_sans_bold"
+                android:layout_marginBottom="20dp" />
 
+            <!-- Profile Info Items -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -73,6 +66,7 @@
                     android:padding="16dp"
                     android:text="나이: 20세"
                     android:textSize="16sp"
+                    android:textColor="#333333"
                     android:fontFamily="@font/spoqa_han_sans_regular" />
             </com.google.android.material.card.MaterialCardView>
 
@@ -89,6 +83,7 @@
                     android:padding="16dp"
                     android:text="키: 170cm"
                     android:textSize="16sp"
+                    android:textColor="#333333"
                     android:fontFamily="@font/spoqa_han_sans_regular" />
             </com.google.android.material.card.MaterialCardView>
 
@@ -105,6 +100,7 @@
                     android:padding="16dp"
                     android:text="몸무게: 60kg"
                     android:textSize="16sp"
+                    android:textColor="#333333"
                     android:fontFamily="@font/spoqa_han_sans_regular" />
             </com.google.android.material.card.MaterialCardView>
 
@@ -121,6 +117,7 @@
                     android:padding="16dp"
                     android:text="누적 거리: 5.2 km"
                     android:textSize="16sp"
+                    android:textColor="#333333"
                     android:fontFamily="@font/spoqa_han_sans_regular" />
             </com.google.android.material.card.MaterialCardView>
 
@@ -137,20 +134,23 @@
                     android:padding="16dp"
                     android:text="만든 도형 수: 3개"
                     android:textSize="16sp"
+                    android:textColor="#333333"
                     android:fontFamily="@font/spoqa_han_sans_regular" />
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- 편집 버튼 -->
-            <Button
+            <!-- Edit Button -->
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnEditProfile"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
                 android:text="프로필 편집"
-                android:fontFamily="@font/spoqa_han_sans_bold"
                 android:textColor="@android:color/white"
-                android:backgroundTint="@android:color/holo_blue_dark" />
-        </LinearLayout>
-        <!-- 기존 LinearLayout 끝 -->
+                app:cornerRadius="24dp"
+                app:backgroundTint="#FF670C"
+                android:fontFamily="@font/spoqa_han_sans_bold"
+                android:textSize="16sp"
+                android:layout_marginTop="24dp" />
 
+        </LinearLayout>
     </ScrollView>
 </RelativeLayout>

@@ -43,25 +43,36 @@ class DrawingBottomSheetFragment : DialogFragment() {
         btnPredict.setOnClickListener {
             val result = drawingView.predictWithModel(interpreter)
 
-            // 예측 결과 다이얼로그
-            androidx.appcompat.app.AlertDialog.Builder(requireContext())
-                .setTitle("예측 결과 확인")
-                .setMessage("그리신 그림이 \"$result\"이 맞나요?")
-                .setPositiveButton("맞아요") { dialog, _ ->
-                    // 🔥 결과를 DrawingActivity로 전달
+            val dialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setTitle("예측한 경로예요")
+                .setMessage("그림을 \"$result\"으로 인식했어요.\n이 경로로 시작할까요?")
+                .setPositiveButton("시작할게요") { dialogInterface, _ ->
                     parentFragmentManager.setFragmentResult(
                         "prediction_result",
                         Bundle().apply { putString("shape", result) }
                     )
-                    dialog.dismiss()
-                    dismiss() // 이 다이얼로그(Fragment)도 닫기
+                    dialogInterface.dismiss()
+                    dismiss()
                 }
-                .setNegativeButton("아니오") { dialog, _ ->
+                .setNegativeButton("다시 그릴게요") { dialogInterface, _ ->
+                    drawingView.clearDrawing()
                     Toast.makeText(requireContext(), "다시 그려주세요.", Toast.LENGTH_SHORT).show()
-                    dialog.dismiss()
+                    dialogInterface.dismiss()
                 }
-                .show()
+                .create()
+
+            dialog.setOnShowListener {
+                // 🎨 색상 지정
+                dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)
+                    ?.setTextColor(requireContext().getColor(R.color.blue_confirm)) // 파랑
+                dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_NEGATIVE)
+                    ?.setTextColor(requireContext().getColor(R.color.red_cancel))   // 빨강
+            }
+
+            dialog.show()
         }
+
+
 
         return rootView
     }

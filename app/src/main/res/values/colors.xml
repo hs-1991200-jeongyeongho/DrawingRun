@@ -12,4 +12,8 @@
     <color name="primaryBlue">#3F51B5</color>
     <color name="primaryTeal">#009688</color>
     <color name="primaryOrange">#FF5722</color>
+    <color name="orange">#FF670C</color>
+    <color name="gray">#666666</color>
+    <color name="blue_confirm">#2979FF</color> <!-- 밝은 파랑 -->
+    <color name="red_cancel">#D32F2F</color>   <!-- 진한 빨강 -->
 </resources>

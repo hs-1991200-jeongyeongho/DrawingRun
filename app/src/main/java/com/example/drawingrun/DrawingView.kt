@@ -62,23 +62,28 @@ class DrawingView(context: Context, attrs: AttributeSet?) : View(context, attrs)
         invalidate()
     }
 
-    private fun getNormalizedPoints(): List<Pair<Float, Float>> {
+    private fun getNormalizedPoints(padding: Boolean = false): List<Pair<Float, Float>> {
         if (points.isEmpty()) return emptyList()
-        Log.d("DrawingView", "Raw Points: ${points.take(10).joinToString()}")
+
         val minX = points.minOf { it.first }
         val maxX = points.maxOf { it.first }
         val minY = points.minOf { it.second }
         val maxY = points.maxOf { it.second }
         val width = maxX - minX
         val height = maxY - minY
-        val normalized = points.map { (x, y) ->
-            val normX = if (width != 0f) (x - minX) / width else 0f
-            val normY = if (height != 0f) (y - minY) / height else 0f
-            normX to normY
+
+        return points.map { (x, y) ->
+            val normX = if (width != 0f) (x - minX) / width else 0.5f
+            val normY = if (height != 0f) (y - minY) / height else 0.5f
+
+            if (padding) {
+                0.1f + 0.8f * normX to 0.1f + 0.8f * normY
+            } else {
+                normX to normY
+            }
         }
-        Log.d("DrawingView", "Normalized Points: ${normalized.take(10).joinToString()}")
-        return normalized
     }
+
 
     fun processForModel(): FloatArray {
         if (points.isEmpty()) {
@@ -86,68 +91,85 @@ class DrawingView(context: Context, attrs: AttributeSet?) : View(context, attrs)
             return FloatArray(0)
         }
 
-        val tempBitmap = Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888)
+        val canvasSize = 300
+        val tempBitmap = Bitmap.createBitmap(canvasSize, canvasSize, Bitmap.Config.ARGB_8888)
         val tempCanvas = Canvas(tempBitmap)
+
         val drawPaint = Paint().apply {
             color = Color.BLACK
-            strokeWidth = 10f
+            strokeWidth = 30f
             style = Paint.Style.STROKE
             isAntiAlias = true
         }
+
         tempCanvas.drawColor(Color.WHITE)
+
         val normalizedPoints = getNormalizedPoints()
+        Log.d("DrawingView", "✅ Normalized Points Count: ${normalizedPoints.size}")
+        Log.d("DrawingView", "✅ First Norm Point: ${normalizedPoints.firstOrNull()}")
+
         val drawPath = Path()
         if (normalizedPoints.isNotEmpty()) {
-            drawPath.moveTo(normalizedPoints[0].first * 299, normalizedPoints[0].second * 299)
+            drawPath.moveTo(normalizedPoints[0].first * (canvasSize - 1), normalizedPoints[0].second * (canvasSize - 1))
             for (i in 1 until normalizedPoints.size) {
-                drawPath.lineTo(normalizedPoints[i].first * 299, normalizedPoints[i].second * 299)
+                drawPath.lineTo(normalizedPoints[i].first * (canvasSize - 1), normalizedPoints[i].second * (canvasSize - 1))
             }
+
+            Log.d("DrawingView", "✅ Path ready, drawing to canvas now")
             tempCanvas.drawPath(drawPath, drawPaint)
+        } else {
+            Log.d("DrawingView", "❌ No normalized points to draw")
         }
 
-        val resizedBitmap = Bitmap.createScaledBitmap(tempBitmap, 28, 28, true)
+        // 비트맵을 모델 입력 크기(96x96)로 리사이즈
+        val resizedBitmap = Bitmap.createScaledBitmap(tempBitmap, 96, 96, true)
 
-        // 비트맵 저장
+        // 저장해보기
         val file = File(context.getExternalFilesDir(null), "preprocessed_${System.currentTimeMillis()}.png")
         FileOutputStream(file).use { out ->
             resizedBitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
         }
         Log.d("DrawingView", "Preprocessed image saved to: ${file.absolutePath}")
 
-        val pixels = IntArray(28 * 28)
-        resizedBitmap.getPixels(pixels, 0, 28, 0, 0, 28, 28)
-        val floatArray = FloatArray(28 * 28)
+        // 픽셀 -> FloatArray (흑백)
+        val pixels = IntArray(96 * 96)
+        resizedBitmap.getPixels(pixels, 0, 96, 0, 0, 96, 96)
+        val floatArray = FloatArray(96 * 96)
         for (i in pixels.indices) {
             val r = Color.red(pixels[i])
             val g = Color.green(pixels[i])
             val b = Color.blue(pixels[i])
-            val gray = (0.299f * r + 0.587f * g + 0.114f * b).toInt()
+            val gray = (0.299f * r + 0.587f * g + 0.114f * b)
             floatArray[i] = 1f - (gray / 255f)
         }
 
-        Log.d("DrawingView", "Input Data Sample: ${floatArray.take(10).joinToString()}")
+        val avg = floatArray.average()
+        Log.d("DrawingView", "✅ Input Data Sample: ${floatArray.take(10).joinToString()}")
+        Log.d("DrawingView", "✅ Input Data Avg: $avg")
+
         return floatArray
     }
+
+
+
 
     fun predictWithModel(interpreter: Interpreter): String {
         Log.d("DrawingView", "predictWithModel called")
         val inputData = processForModel()
         if (inputData.isEmpty()) return "No Data"
 
-        val input = Array(1) { Array(28) { Array(28) { FloatArray(1) } } }
-        for (i in 0 until 28) {
-            for (j in 0 until 28) {
-                input[0][i][j][0] = inputData[i * 28 + j]
+        // 96x96 입력을 4차원 배열로 구성
+        val input = Array(1) { Array(96) { Array(96) { FloatArray(1) } } }
+        for (i in 0 until 96) {
+            for (j in 0 until 96) {
+                input[0][i][j][0] = inputData[i * 96 + j]
             }
         }
 
-        val output = Array(1) { FloatArray(16) }
+        val output = Array(1) { FloatArray(9) }  // 클래스 개수
         interpreter.run(input, output)
 
-        val classes = arrayOf(
-            "circle", "square", "triangle", "diamond", "star", "heart", "moon", "cup",
-            "hand", "house", "spoon", "fork", "eyeglasses", "butterfly", "grapes", "light bulb"
-        )
+        val classes = arrayOf("circle", "square", "triangle", "diamond", "star", "hand", "butterfly", "key", "nail")
 
         val predictedIndex = output[0].indices.maxByOrNull { output[0][it] } ?: -1
         Log.d("DrawingView", "Output: ${output[0].joinToString()}")
@@ -162,6 +184,8 @@ class DrawingView(context: Context, attrs: AttributeSet?) : View(context, attrs)
             "Invalid Prediction"
         }
     }
+
+
 
     fun getBitmap(): Bitmap {
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)

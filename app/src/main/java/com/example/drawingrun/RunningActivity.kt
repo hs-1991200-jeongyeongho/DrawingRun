@@ -3,6 +3,8 @@ package com.example.drawingrun
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.location.Location
 import android.os.Bundle
 import android.os.Handler
@@ -21,10 +23,13 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import java.io.File
+import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.*
 import kotlin.math.roundToInt
 
 class RunningActivity : BaseActivity(), OnMapReadyCallback {
-
     private lateinit var mMap: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
@@ -54,7 +59,6 @@ class RunningActivity : BaseActivity(), OnMapReadyCallback {
         setContentView(R.layout.activity_running)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
         val mapFragment = supportFragmentManager.findFragmentById(R.id.running_map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
@@ -67,7 +71,6 @@ class RunningActivity : BaseActivity(), OnMapReadyCallback {
         endButton = findViewById(R.id.end_button)
 
         fetchUserWeight()
-
         showOnlyStartButton()
 
         startButton.setOnClickListener {
@@ -82,21 +85,20 @@ class RunningActivity : BaseActivity(), OnMapReadyCallback {
 
         pauseButton.setOnClickListener {
             isRunning = !isRunning
-
             if (isRunning) {
-                pauseButton.text = "⏸ 일시정지"
+                pauseButton.text = "일시정지"
                 pauseButton.setBackgroundResource(R.drawable.button_pause_bg)
                 startTime = System.currentTimeMillis()
                 handler.post(timerRunnable)
             } else {
-                pauseButton.text = "▶ 재개"
+                pauseButton.text = "재개"
                 pauseButton.setBackgroundResource(R.drawable.button_resume_bg)
                 elapsedTime += System.currentTimeMillis() - startTime
             }
         }
 
         endButton.setOnClickListener {
-            onRunEnded()
+            onRunEndedDirectly()
             showOnlyStartButton()
         }
 
@@ -128,7 +130,8 @@ class RunningActivity : BaseActivity(), OnMapReadyCallback {
         pauseButton.text = "일시정지"
     }
 
-    private fun onRunEnded() {
+    private fun onRunEndedDirectly() {
+        handler.removeCallbacks(timerRunnable)
         fusedLocationClient.removeLocationUpdates(locationCallback)
 
         val endTimeMillis = System.currentTimeMillis()
@@ -149,27 +152,40 @@ class RunningActivity : BaseActivity(), OnMapReadyCallback {
         val calories = mets * weight * durationHours
         val timeFormatted = String.format("%.0f분 %.0f초", durationSeconds / 60, durationSeconds % 60)
 
-        val dialog = WorkoutSummaryDialog(this, timeFormatted, distanceKm, calories) {
-            val intent = Intent(this, WorkoutResultActivity::class.java).apply {
-                putExtra("calories", calories)
-                putExtra("time", timeFormatted)
-                putExtra("distance", distanceKm)
-            }
-            startActivity(intent)
-            finish()
-        }
-        dialog.show()
+
+        captureScreenAndNavigate(calories, timeFormatted, distanceKm)
     }
+
+    private fun captureScreenAndNavigate(calories: Double, time: String, distance: Double) {
+        val dateFormatted = SimpleDateFormat("yyyy.MM.dd", Locale.getDefault()).format(Date())
+
+        mMap.setOnMapLoadedCallback {
+            mMap.snapshot { bitmap ->
+                if (bitmap != null) {
+                    val file = File(cacheDir, "run_capture_${System.currentTimeMillis()}.png")
+                    FileOutputStream(file).use {
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+                    }
+
+                    val intent = Intent(this, WorkoutResultActivity::class.java).apply {
+                        putExtra("imagePath", file.absolutePath)
+                        putExtra("calories", calories)
+                        putExtra("time", time)
+                        putExtra("distance", distance)
+                        putExtra("date", dateFormatted)
+                    }
+                    startActivity(intent)
+                } else {
+                    Toast.makeText(this, "지도 캡처에 실패했습니다", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        mMap.uiSettings.apply {
-            isZoomControlsEnabled = true
-            isScrollGesturesEnabled = true
-            isTiltGesturesEnabled = true
-            isRotateGesturesEnabled = true
-        }
-
+        mMap.uiSettings.isZoomControlsEnabled = true
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mMap.isMyLocationEnabled = true
         }
@@ -198,7 +214,6 @@ class RunningActivity : BaseActivity(), OnMapReadyCallback {
 
     private fun setupLocationUpdates() {
         locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000L).build()
-
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(result: LocationResult) {
                 if (!isRunning) return
@@ -208,9 +223,7 @@ class RunningActivity : BaseActivity(), OnMapReadyCallback {
                     runningPath.add(latLng)
 
                     if (pathPolyline == null) {
-                        pathPolyline = mMap.addPolyline(
-                            PolylineOptions().add(latLng).color(0xFF00FF00.toInt()).width(8f)
-                        )
+                        pathPolyline = mMap.addPolyline(PolylineOptions().add(latLng).color(0xFF00FF00.toInt()).width(8f))
                     } else {
                         pathPolyline?.points = runningPath
                     }

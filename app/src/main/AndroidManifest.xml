@@ -60,11 +60,18 @@
 
         <activity
             android:name=".WorkoutResultActivity"
-            android:theme="@style/Theme.DrawingRun" />
+            android:theme="@style/PopupActivityTheme" />
+
 
         <activity
             android:name=".RouteUploadActivity"
             android:theme="@style/Theme.DrawingRun" />
+
+        <activity
+            android:name=".WorkoutSummaryActivity"
+            android:theme="@style/Theme.DrawingRun" />
+
+
 
         <activity
             android:name=".SplashActivity"

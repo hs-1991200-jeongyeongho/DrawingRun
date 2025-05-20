@@ -76,7 +76,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/button_pause_bg"
-            android:text="⏸ 일시정지" />
+            android:text="일시정지" />
 
         <Space
             android:layout_width="12dp"
@@ -88,6 +88,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/button_end_bg"
-            android:text="⏹ 종료" />
+            android:text="종료" />
     </LinearLayout>
 </FrameLayout>
