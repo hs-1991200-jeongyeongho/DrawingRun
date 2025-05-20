@@ -5,33 +5,34 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.platform.LocalContext
-import com.example.drawingrun.ui.theme.DrawingRunTheme
 import androidx.compose.foundation.Image
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.Alignment
-import androidx.compose.material3.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.unit.sp
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.background
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.EaseOutBack
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.material3.Typography
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Preview
+import com.example.drawingrun.ui.theme.DrawingRunTheme
+import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,12 +40,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             DrawingRunTheme {
-                Scaffold(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.White)
-                ) { innerPadding ->
-                    MainScreen(modifier = Modifier.padding(innerPadding))
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    MainScreen()
                 }
             }
         }
@@ -52,8 +52,9 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainScreen(modifier: Modifier = Modifier) {
+fun MainScreen() {
     val context = LocalContext.current
+
     val spoqaFontFamily = FontFamily(
         Font(R.font.spoqa_han_sans_regular, FontWeight.Normal),
         Font(R.font.spoqa_han_sans_bold, FontWeight.Bold),
@@ -61,90 +62,120 @@ fun MainScreen(modifier: Modifier = Modifier) {
         Font(R.font.spoqa_han_sans_thin, FontWeight.Thin),
     )
 
+    // 로고 애니메이션
+    val logoScale = remember { Animatable(0.8f) }
+    LaunchedEffect(Unit) {
+        logoScale.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = 800, easing = EaseOutBack)
+        )
+    }
+
+    // 설명 텍스트 fade-in
+    val textAlpha = remember { Animatable(0f) }
+    LaunchedEffect(Unit) {
+        delay(310)
+        textAlpha.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = 600)
+        )
+    }
+
+    val backgroundBrush = Brush.verticalGradient(
+        colors = listOf(Color(0xFFFDFDFD), Color(0xFFFAFAFA))
+    )
+
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .background(brush = backgroundBrush)
+            .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
-        // 로고 이미지
-        Image(
-            painter = painterResource(id = R.drawable.drawing_run_logo),
-            contentDescription = "DrawingRun 로고",
-            contentScale = ContentScale.FillWidth,
+        Spacer(modifier = Modifier.height(100.dp))
+
+        // 로고 + 배경 원형
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(300.dp)
-                .shadow(8.dp, shape = RoundedCornerShape(7.dp))
-        )
+                .size(220.dp)
+                .graphicsLayer {
+                    scaleX = logoScale.value
+                    scaleY = logoScale.value
+                }
+                .background(Color(0xFFECEFF1).copy(alpha = 0.35f), CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_logo),
+                contentDescription = "DrawingRun 로고",
+                modifier = Modifier.size(130.dp)
+            )
+        }
 
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-        // 바로 밑에 문구
+        // 설명 텍스트
         Text(
-            text = "MAKE YOUR RUN",
-            fontSize = 45.sp,
-            fontWeight = FontWeight.Bold,
+            text = "그림을 그리고\n러닝을 시작하세요",
+            fontSize = 16.sp,
+            color = Color(0xFF616161),
+            fontFamily = spoqaFontFamily,
             textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 5.dp)
+            modifier = Modifier.alpha(textAlpha.value)
         )
 
-        // 경로 선택 버튼
+        Spacer(modifier = Modifier.weight(1f))
+
+        // 시작 버튼
         Button(
             onClick = {
                 context.startActivity(Intent(context, DrawingActivity::class.java))
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 32.dp, vertical = 8.dp),
-            shape = RoundedCornerShape(24.dp),
+            shape = RoundedCornerShape(28.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF2196F3), // 파란색
+                containerColor = Color(0xFFFF6D00),
                 contentColor = Color.White
-            )
+            ),
+            elevation = ButtonDefaults.buttonElevation(6.dp),
+            modifier = Modifier
+                .width(200.dp)
+                .height(56.dp)
         ) {
             Text(
-                text = "경로 만들기",
-                fontSize = 19.sp,
+                text = "시작",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
                 fontFamily = spoqaFontFamily,
-                fontWeight = FontWeight.Bold
+                modifier = Modifier.padding(top = 1.dp) // 시각 중심 보정
             )
         }
 
-        // 지도 열기 버튼
-        Button(
-            onClick = {
-                context.startActivity(Intent(context, MapsActivity::class.java))
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 32.dp, vertical = 8.dp),
-            shape = RoundedCornerShape(24.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF2196F3), // 초록색
-                contentColor = Color.White
-            )
-        ) {
-            Text(
-                text = "지도 열기",
-                fontSize = 19.sp,
-                fontFamily = spoqaFontFamily,
-                fontWeight = FontWeight.Bold
-            )
-        }
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // 슬로건 텍스트 (진하게 수정)
+        Text(
+            text = "지금, 당신의 러닝을 그려보세요",
+            fontSize = 13.sp,
+            color = Color(0xFF757575),
+            fontFamily = spoqaFontFamily
+        )
+
+        Spacer(modifier = Modifier.height(28.dp))
+
+        // 하단 버전 정보 (구분자 추가)
+        Text(
+            text = "v1.0.1 • DrawingRun",
+            fontSize = 12.sp,
+            color = Color.LightGray
+        )
     }
-
 }
 
-
-@Preview(showBackground = true)
+@Preview(showBackground = true, name = "Main 화면 미리보기")
 @Composable
-fun GreetingPreview() {
+fun MainScreenPreview() {
     DrawingRunTheme {
-        // 미리보기를 위해 아무것도 호출하지 않거나,
-        // MainScreen() 대신 단순 UI만 미리보기용으로 쓸 수 있음
+        MainScreen()
     }
 }
