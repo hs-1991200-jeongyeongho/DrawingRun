@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.example.drawingrun.LoginActivity
 
 class ProfileActivity : AppCompatActivity() {
 
@@ -91,19 +92,20 @@ class ProfileActivity : AppCompatActivity() {
                 onBackPressed() // 또는 finish()
                 true
             }
+
             R.id.action_logout -> {
                 showLogoutDialog()
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
 
 
-
     // 로그아웃 확인 다이얼로그
     private fun showLogoutDialog() {
-        AlertDialog.Builder(this)
+        val dialog = AlertDialog.Builder(this)
             .setTitle("로그아웃")
             .setMessage("정말 로그아웃하시겠습니까?")
             .setPositiveButton("확인") { _, _ ->
@@ -112,6 +114,15 @@ class ProfileActivity : AppCompatActivity() {
                 finish()
             }
             .setNegativeButton("취소", null)
-            .show()
+            .create()
+
+        dialog.setOnShowListener {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                ?.setTextColor(getColor(R.color.blue_confirm)) // 파란색
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+                ?.setTextColor(getColor(R.color.red_cancel))   // 빨간색
+        }
+
+        dialog.show()
     }
 }

@@ -39,7 +39,11 @@ android {
     buildFeatures {
         compose = true
     }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.12"
+    }
 }
+
 
 dependencies {
 
@@ -47,11 +51,9 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
 
     implementation("com.google.firebase:firebase-auth:22.3.0")
     implementation("com.google.firebase:firebase-firestore-ktx:24.10.0")
@@ -62,7 +64,6 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation("com.google.android.gms:play-services-location:21.0.1")
-    implementation("com.google.android.material:material:1.10.0")
 
 
 
@@ -70,8 +71,8 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation(platform("androidx.compose:compose-bom:2024.03.00"))
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
@@ -80,5 +81,7 @@ dependencies {
     implementation ("org.tensorflow:tensorflow-lite-task-vision:0.4.0")
     implementation ("androidx.core:core-splashscreen:1.0.1")
     implementation ("androidx.cardview:cardview:1.0.0")
-
+    implementation ("androidx.compose.material3:material3:1.2.1")
+    implementation ("androidx.compose.material:material-icons-extended")
+    implementation(platform("androidx.compose:compose-bom:2024.03.00"))
 }

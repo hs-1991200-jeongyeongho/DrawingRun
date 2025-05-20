@@ -21,12 +21,15 @@
         <item name="android:navigationBarColor">#FFFFFF</item>
     </style>
 
+    <!-- 스플래쉬 스타일 -->
     <style name="Theme.DrawingRun.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/white</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/drawing_run_logo</item>
-        <item name="windowSplashScreenAnimationDuration">1000</item> <!-- 1초 -->
-        <item name="postSplashScreenTheme">@style/Theme.DrawingRun</item> <!-- 기존 앱 테마로 전환 -->
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_logo</item>
+        <item name="windowSplashScreenIconBackgroundColor">@android:color/transparent</item>
+        <item name="windowSplashScreenAnimationDuration">1000</item>
+        <item name="postSplashScreenTheme">@style/Theme.DrawingRun</item>
     </style>
+
 
     <style name="InfoLabel">
         <item name="android:layout_width">wrap_content</item>
