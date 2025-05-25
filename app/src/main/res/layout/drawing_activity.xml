@@ -1,70 +1,92 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/root_layout"
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <!-- 툴바 (최상단 고정) -->
-    <include
-        layout="@layout/toolbar_layout"
+    <!-- 🟠 메인 콘텐츠 (지도, 시작버튼, 사이드바 열기버튼 포함) -->
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="match_parent">
 
-    <!-- 본문: 왼쪽 사이드바 + 오른쪽 지도 -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal">
+        <!-- 지도 -->
+        <fragment
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
-        <!-- 왼쪽 도형 라벨 버튼 -->
-        <ScrollView
-            android:layout_width="72dp"
-            android:layout_height="match_parent"
-            android:background="#F4EDE7">
+        <!-- 툴바 -->
+        <include
+            layout="@layout/toolbar_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
-            <LinearLayout
-                android:id="@+id/label_menu"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="4dp"/>
-        </ScrollView>
+        <!-- 사이드바 닫힌 상태에서 보일 버튼 (왼쪽 가장자리에 고정) -->
+        <ImageButton
+            android:id="@+id/btn_toggle_sidebar_closed"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_gravity="center_vertical|start"
+            android:layout_marginStart="-16dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="8dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_arrow_right"
+            android:contentDescription="사이드바 열기"
+            android:visibility="visible" />
 
-        <!-- 오른쪽 지도 영역 -->
+        <!-- 러닝 시작 버튼 -->
         <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:id="@+id/btn_start_running"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="28dp"
+            android:background="@drawable/bg_round_orange"
+            android:clickable="true"
+            android:focusable="true"
+            android:elevation="12dp">
 
-            <!-- 지도 Fragment -->
-            <fragment
-                android:id="@+id/map"
-                android:name="com.google.android.gms.maps.SupportMapFragment"
+            <TextView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-            <!-- 시작 버튼 -->
-            <FrameLayout
-                android:id="@+id/btn_start_running"
-                android:layout_width="96dp"
-                android:layout_height="96dp"
-                android:layout_gravity="bottom|center_horizontal"
-                android:layout_marginBottom="28dp"
-                android:background="@drawable/bg_round_orange"
-                android:clickable="true"
-                android:focusable="true"
-                android:elevation="12dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:text="시작"
-                    android:textSize="22sp"
-                    android:textColor="@android:color/white"
-                    android:fontFamily="@font/spoqa_han_sans_bold"/>
-            </FrameLayout>
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="시작"
+                android:textSize="22sp"
+                android:textColor="@android:color/white"
+                android:fontFamily="@font/spoqa_han_sans_bold" />
         </FrameLayout>
-    </LinearLayout>
-</LinearLayout>
+    </FrameLayout>
+
+    <!-- 🟡 사이드바 -->
+    <FrameLayout
+        android:id="@+id/label_menu"
+        android:layout_width="280dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start">
+
+        <!-- 사이드바 내부 메뉴 -->
+        <LinearLayout
+            android:id="@+id/label_menu_inner"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="#F5F5F5"
+            android:padding="12dp" />
+
+        <!-- 사이드바 열린 상태에서 보일 닫기 버튼 (오른쪽 경계 튀어나오게) -->
+        <ImageButton
+            android:id="@+id/btn_toggle_sidebar_open"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_gravity="center_vertical|end"
+            android:layout_marginEnd="-16dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="8dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_arrow_left"
+            android:contentDescription="사이드바 닫기" />
+    </FrameLayout>
+
+</androidx.drawerlayout.widget.DrawerLayout>

@@ -84,4 +84,6 @@ dependencies {
     implementation ("androidx.compose.material3:material3:1.2.1")
     implementation ("androidx.compose.material:material-icons-extended")
     implementation(platform("androidx.compose:compose-bom:2024.03.00"))
+    implementation ("androidx.slidingpanelayout:slidingpanelayout:1.2.0")
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
 }
