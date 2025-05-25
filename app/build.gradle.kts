@@ -86,4 +86,5 @@ dependencies {
     implementation(platform("androidx.compose:compose-bom:2024.03.00"))
     implementation ("androidx.slidingpanelayout:slidingpanelayout:1.2.0")
     implementation ("com.github.bumptech.glide:glide:4.16.0")
+    implementation ("androidx.gridlayout:gridlayout:1.0.0")
 }
