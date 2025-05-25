@@ -1,71 +1,70 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <!-- 지도 Fragment (맨 뒤에 깔림) -->
-    <fragment
-        android:id="@+id/map"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-    <!-- 툴바 (상단 고정) -->
+    <!-- 툴바 (최상단 고정) -->
     <include
         layout="@layout/toolbar_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <!-- 그림판 (필요할 때만 보임) -->
+    <!-- 본문: 왼쪽 사이드바 + 오른쪽 지도 -->
     <LinearLayout
-        android:id="@+id/drawing_layout"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:layout_gravity="bottom"
-        android:orientation="vertical"
-        android:visibility="gone"
-        android:padding="8dp"
-        android:background="@color/bg_light">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
 
-        <com.example.drawingrun.DrawingView
-            android:id="@+id/drawing_view"
-            android:layout_width="match_parent"
+        <!-- 왼쪽 도형 라벨 버튼 -->
+        <ScrollView
+            android:layout_width="72dp"
             android:layout_height="match_parent"
-            android:background="@android:color/white" />
+            android:background="#F4EDE7">
+
+            <LinearLayout
+                android:id="@+id/label_menu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="4dp"/>
+        </ScrollView>
+
+        <!-- 오른쪽 지도 영역 -->
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+            <!-- 지도 Fragment -->
+            <fragment
+                android:id="@+id/map"
+                android:name="com.google.android.gms.maps.SupportMapFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <!-- 시작 버튼 -->
+            <FrameLayout
+                android:id="@+id/btn_start_running"
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_marginBottom="28dp"
+                android:background="@drawable/bg_round_orange"
+                android:clickable="true"
+                android:focusable="true"
+                android:elevation="12dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="시작"
+                    android:textSize="22sp"
+                    android:textColor="@android:color/white"
+                    android:fontFamily="@font/spoqa_han_sans_bold"/>
+            </FrameLayout>
+        </FrameLayout>
     </LinearLayout>
-
-    <!--커스텀 버튼-->
-    <FrameLayout
-        android:id="@+id/btn_start_running"
-        android:layout_width="96dp"
-        android:layout_height="96dp"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="28dp"
-        android:background="@drawable/bg_round_orange"
-        android:clickable="true"
-        android:focusable="true"
-        android:elevation="12dp">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:text="시작"
-            android:textSize="22sp"
-            android:textColor="@android:color/white"
-            android:fontFamily="@font/spoqa_han_sans_bold"/>
-    </FrameLayout>
-
-    <!-- 떠다니는 버튼 (우측 하단) -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_drawing"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="96dp"
-        android:elevation="16dp"
-        android:src="@drawable/ic_note"
-        app:backgroundTint="#FFA726"
-        app:tint="@android:color/white" />
-</FrameLayout>
+</LinearLayout>
