@@ -66,6 +66,31 @@ class DrawingActivity : AppCompatActivity(), OnMapReadyCallback {
                     it.width = 6f
                 }
             }
+
+            val routeDocId = clicked.tag as? String
+            if (routeDocId != null) {
+                FirebaseFirestore.getInstance()
+                    .collection("route")
+                    .document(routeDocId)
+                    .get()
+                    .addOnSuccessListener { doc ->
+                        val label = doc.getString("label") ?: "알 수 없음"
+                        val labelKr = doc.getString("label_kr") ?: "이름 없음"
+                        val distance = doc.getDouble("distance") ?: 0.0
+
+                        val infoText = """
+                🏷️ 라벨: $label
+                📏 거리: ${String.format("%.2f", distance)} km
+            """.trimIndent()
+
+                        val dialog = RouteInfoDialog.newInstance(labelKr, infoText)
+                        dialog.show(supportFragmentManager, "route_info_dialog")
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(this, "❌ 설명 불러오기 실패", Toast.LENGTH_SHORT).show()
+                    }
+            }
+
         }
     }
 
