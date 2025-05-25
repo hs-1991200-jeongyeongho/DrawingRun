@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.DrawingRun" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- 툴바: 밝은 라이트 그레이 -->
+        <item name="colorPrimary">#F5F5F5</item> <!-- light gray -->
+        <item name="colorPrimaryVariant">#E0E0E0</item> <!-- 더 어두운 회색 -->
+        <item name="colorOnPrimary">#212121</item> <!-- 짙은 텍스트/아이콘 -->
+
+        <!-- 액션 버튼 계열 (오렌지) -->
+        <item name="colorSecondary">#FF670C</item>
+        <item name="colorSecondaryVariant">#E65C00</item>
+        <item name="colorOnSecondary">@android:color/white</item>
+
+        <!-- 기본 -->
+        <item name="android:windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
+
+        <!-- 시스템 UI 색상 조정 -->
+        <item name="android:statusBarColor">#F5F5F5</item>
+        <item name="android:navigationBarColor">#FFFFFF</item>
+    </style>
+
+    <!-- 스플래쉬 스타일 -->
+    <style name="Theme.DrawingRun.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/white</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_logo</item>
+        <item name="windowSplashScreenIconBackgroundColor">@android:color/transparent</item>
+        <item name="windowSplashScreenAnimationDuration">1000</item>
+        <item name="postSplashScreenTheme">@style/Theme.DrawingRun</item>
+    </style>
+
+
+    <style name="InfoLabel">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">#212121</item>
+        <item name="android:textSize">16sp</item>
+
+        <!-- 추가 추천 항목 -->
+        <item name="android:fontFamily">@font/spoqa_han_sans_bold</item> <!-- 앱 전체와 통일 -->
+        <item name="android:lineSpacingExtra">2dp</item> <!-- 줄 간격 여유 -->
+        <item name="android:gravity">end</item> <!-- 숫자 정렬용: end or center -->
+        <item name="android:layout_marginBottom">4dp</item> <!-- 요소 간 간격 -->
+    </style>
+
+    <style name="RoundedButton" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/rounded_button_bg</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:fontFamily">@font/spoqa_han_sans_bold</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:minHeight">44dp</item>
+        <item name="android:minWidth">100dp</item>
+        <item name="android:paddingStart">12dp</item>
+        <item name="android:paddingEnd">12dp</item>
+    </style>
+
+    <style name="PopupActivityTheme" parent="Theme.MaterialComponents.Dialog">
+        <item name="android:windowMinWidthMajor">90%</item>
+        <item name="android:windowMinWidthMinor">90%</item>
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowCloseOnTouchOutside">false</item>
+    </style>
+
+
+</resources>
