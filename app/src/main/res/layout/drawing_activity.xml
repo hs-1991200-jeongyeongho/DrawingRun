@@ -36,7 +36,7 @@
                 android:layout_marginStart="-16dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:padding="8dp"
-                android:src="@drawable/ic_arrow_right"
+                android:src="@drawable/chevron_right"
                 android:contentDescription="사이드바 열기" />
 
             <FrameLayout
@@ -76,8 +76,8 @@
                 android:id="@+id/recycler_labels"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:padding="12dp"
-                android:background="#F5F5F5" />
+                android:padding="2dp"
+                android:background="#00000000" />
 
             <ImageButton
                 android:id="@+id/btn_toggle_sidebar_open"
@@ -87,7 +87,7 @@
                 android:layout_marginEnd="-16dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:padding="8dp"
-                android:src="@drawable/ic_arrow_left"
+                android:src="@drawable/chevron_left"
                 android:contentDescription="사이드바 닫기" />
         </FrameLayout>
     </com.example.drawingrun.CustomDrawerLayout>
