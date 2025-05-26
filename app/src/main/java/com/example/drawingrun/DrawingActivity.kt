@@ -14,6 +14,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -37,9 +38,12 @@ class DrawingActivity : BaseActivity(), OnMapReadyCallback {
 
     private val routePolylines = mutableListOf<Polyline>()
     private var selectedRoute: Polyline? = null
+    private var selectedRouteFromList: Polyline? = null
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var lastLocation: Location? = null
     private lateinit var labelRecycler: RecyclerView
+    private lateinit var routeInfoRecycler: RecyclerView
+    private var routeInfoAdapter: RouteInfoItemAdapter? = null
 
     private var selectedRoutePoints: List<LatLng>? = null
 
@@ -48,6 +52,8 @@ class DrawingActivity : BaseActivity(), OnMapReadyCallback {
         setContentView(R.layout.drawing_activity)
 
         guideCard = findViewById(R.id.guide_message_card)
+        routeInfoRecycler = findViewById(R.id.recycler_route_info)
+        routeInfoRecycler.layoutManager = LinearLayoutManager(this)
 
         setupToolbarWithProfileAlwaysBack()
 
@@ -133,39 +139,15 @@ class DrawingActivity : BaseActivity(), OnMapReadyCallback {
         }
 
         mMap.setOnPolylineClickListener { clicked ->
-            if (selectedRoute == clicked) {
-                clicked.color = Color.rgb(100, 150, 160)
-                clicked.width = 6f
-                selectedRoute = null
-                return@setOnPolylineClickListener
-            }
-
             selectedRoute = clicked
-            routePolylines.forEach {
-                it.color = if (it == clicked) Color.MAGENTA else Color.rgb(100, 150, 160)
-                it.width = if (it == clicked) 14f else 6f
-            }
-
-            val routeDocId = clicked.tag as? String ?: return@setOnPolylineClickListener
-
-            db.collection("route").document(routeDocId).get().addOnSuccessListener { doc ->
-                val label = doc.getString("label") ?: "알 수 없음"
-                val labelKr = doc.getString("label_kr") ?: "이름 없음"
-                val distance = doc.getDouble("distance") ?: 0.0
-                val routePoints = (doc["points"] as? List<GeoPoint>)?.map { LatLng(it.latitude, it.longitude) } ?: emptyList()
-
-                val userDistanceText = lastLocation?.let {
-                    val minDistance = DistanceUtils.calculateMinDistanceToRoute(it, routePoints)
-                    "🚶 내 위치에서 거리: ${DistanceUtils.formatDistance(minDistance)}"
-                } ?: "🚶 현재 위치 정보 없음"
-
-                val infoText = """
-                    🏋️ 라벨: $label
-                    📏 거리: ${"%.2f".format(distance)} km
-                    $userDistanceText
-                """.trimIndent()
-
-                RouteInfoDialog.newInstance(labelKr, infoText).show(supportFragmentManager, "route_info_dialog")
+            routePolylines.forEachIndexed { index, polyline ->
+                polyline.color = if (polyline == clicked) Color.RED else Color.MAGENTA
+                polyline.width = if (polyline == clicked) 18f else 14f
+                if (polyline == clicked) {
+                    routeInfoRecycler.smoothScrollToPosition(index)
+                    routeInfoAdapter?.highlightItemAt(index)
+                    selectedRoutePoints = polyline.points
+                }
             }
         }
     }
@@ -208,14 +190,15 @@ class DrawingActivity : BaseActivity(), OnMapReadyCallback {
                 }
 
                 labelRecycler.adapter = LabelAdapter(items) { item ->
-                    loadPolylineFromFirestore(item.label)
+                    loadPolylineFromFirestore(item.label, item.labelKr)
                     guideCard.visibility = View.GONE
+                    routeInfoRecycler.visibility = View.VISIBLE
                 }
             }
         }
     }
 
-    private fun loadPolylineFromFirestore(label: String) {
+    private fun loadPolylineFromFirestore(label: String, labelKr: String) {
         val lowercaseLabel = label.lowercase()
         db.collection("route").whereEqualTo("label", lowercaseLabel).get().addOnSuccessListener { documents ->
             if (documents.isEmpty) return@addOnSuccessListener
@@ -223,8 +206,10 @@ class DrawingActivity : BaseActivity(), OnMapReadyCallback {
             routePolylines.forEach { it.remove() }
             routePolylines.clear()
             selectedRoute = null
-
+            selectedRouteFromList = null
             selectedRoutePoints = null
+
+            val routeItems = mutableListOf<RouteInfoItemAdapter.RouteInfoItem>()
 
             documents.forEachIndexed { index, doc ->
                 val geoPoints = doc["points"] as? List<GeoPoint> ?: return@forEachIndexed
@@ -240,7 +225,41 @@ class DrawingActivity : BaseActivity(), OnMapReadyCallback {
                     selectedRoutePoints = latLngList
                     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLngList.first(), 15f))
                 }
+
+                val distance = doc.getDouble("distance") ?: 0.0
+
+                val userDistanceText = lastLocation?.let {
+                    val minDistance = DistanceUtils.calculateMinDistanceToRoute(it, latLngList)
+                    "🚶 내 위치에서 거리: ${DistanceUtils.formatDistance(minDistance)}"
+                } ?: "🚶 현재 위치 정보 없음"
+
+                val description = """
+                    📏 거리: ${"%.2f".format(distance)} km
+                    $userDistanceText
+                """.trimIndent()
+
+                val title = "$labelKr ${index + 1}"
+                routeItems.add(RouteInfoItemAdapter.RouteInfoItem(title, description, latLngList))
             }
+
+            routeInfoAdapter = RouteInfoItemAdapter(routeItems) { selectedItem ->
+                val center = selectedItem.points.firstOrNull() ?: return@RouteInfoItemAdapter
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(center, 15f))
+
+                selectedRouteFromList = null
+                routePolylines.forEach {
+                    it.color = Color.MAGENTA
+                    it.width = 14f
+                    if (it.points == selectedItem.points) {
+                        it.color = Color.RED
+                        it.width = 18f
+                        selectedRouteFromList = it
+                    }
+                }
+
+                selectedRoutePoints = selectedItem.points
+            }
+            routeInfoRecycler.adapter = routeInfoAdapter
         }
     }
 
