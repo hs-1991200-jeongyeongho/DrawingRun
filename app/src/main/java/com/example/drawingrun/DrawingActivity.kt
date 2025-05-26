@@ -6,16 +6,15 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
-import android.util.Log
-import android.view.Gravity
 import android.view.View
-import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import com.bumptech.glide.Glide
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -24,13 +23,11 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
-import androidx.gridlayout.widget.GridLayout
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 
 class DrawingActivity : BaseActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
+    private lateinit var guideCard: CardView
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var labelMenu: FrameLayout
     private lateinit var btnToggleSidebarOpen: ImageButton
@@ -50,9 +47,10 @@ class DrawingActivity : BaseActivity(), OnMapReadyCallback {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.drawing_activity)
 
+        guideCard = findViewById(R.id.guide_message_card)
+
         setupToolbarWithProfileAlwaysBack()
 
-        // ✅ 사이드바 열어도 지도 어두워지지 않게
         drawerLayout = findViewById(R.id.drawer_layout)
         drawerLayout.setScrimColor(Color.TRANSPARENT)
 
@@ -65,13 +63,11 @@ class DrawingActivity : BaseActivity(), OnMapReadyCallback {
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        drawerLayout = findViewById(R.id.drawer_layout)
         labelMenu = findViewById(R.id.label_menu)
         btnToggleSidebarOpen = findViewById(R.id.btn_toggle_sidebar_open)
         btnToggleSidebarClosed = findViewById(R.id.btn_toggle_sidebar_closed)
         startButton = findViewById(R.id.btn_start_running)
 
-        //drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
         btnToggleSidebarClosed.visibility = View.VISIBLE
 
         btnToggleSidebarClosed.setOnClickListener {
@@ -107,7 +103,7 @@ class DrawingActivity : BaseActivity(), OnMapReadyCallback {
             val intent = Intent(this, RunningActivity::class.java)
             intent.putParcelableArrayListExtra(
                 "selected_route_points",
-                ArrayList(selectedRoutePoints)  // List<LatLng> → ArrayList<LatLng>
+                ArrayList(selectedRoutePoints)
             )
             startActivity(intent)
         }
@@ -127,14 +123,11 @@ class DrawingActivity : BaseActivity(), OnMapReadyCallback {
                 val targetLatLng = if (location != null) {
                     LatLng(location.latitude, location.longitude)
                 } else {
-                    // ✅ 위치 없을 때: 한성대학교
                     LatLng(37.5826, 127.0101)
                 }
-
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(targetLatLng, 16f))
             }
         } else {
-            // ✅ 권한 없을 때도 한성대 위치로
             val hansung = LatLng(37.5826, 127.0101)
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(hansung, 16f))
         }
@@ -163,8 +156,8 @@ class DrawingActivity : BaseActivity(), OnMapReadyCallback {
 
                 val userDistanceText = lastLocation?.let {
                     val minDistance = DistanceUtils.calculateMinDistanceToRoute(it, routePoints)
-                    "\uD83D\uDEB6 내 위치에서 거리: ${DistanceUtils.formatDistance(minDistance)}"
-                } ?: "\uD83D\uDEB6 현재 위치 정보 없음"
+                    "🚶 내 위치에서 거리: ${DistanceUtils.formatDistance(minDistance)}"
+                } ?: "🚶 현재 위치 정보 없음"
 
                 val infoText = """
                     🏋️ 라벨: $label
@@ -216,11 +209,11 @@ class DrawingActivity : BaseActivity(), OnMapReadyCallback {
 
                 labelRecycler.adapter = LabelAdapter(items) { item ->
                     loadPolylineFromFirestore(item.label)
+                    guideCard.visibility = View.GONE
                 }
             }
         }
     }
-
 
     private fun loadPolylineFromFirestore(label: String) {
         val lowercaseLabel = label.lowercase()
@@ -231,7 +224,6 @@ class DrawingActivity : BaseActivity(), OnMapReadyCallback {
             routePolylines.clear()
             selectedRoute = null
 
-            // ✅ 여기에서 선택된 경로 저장용 변수 초기화
             selectedRoutePoints = null
 
             documents.forEachIndexed { index, doc ->
@@ -244,7 +236,6 @@ class DrawingActivity : BaseActivity(), OnMapReadyCallback {
                 polyline.tag = doc.id
                 routePolylines.add(polyline)
 
-                // ✅ 가장 첫 번째 경로를 선택된 경로로 저장
                 if (index == 0) {
                     selectedRoutePoints = latLngList
                     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLngList.first(), 15f))
@@ -252,7 +243,6 @@ class DrawingActivity : BaseActivity(), OnMapReadyCallback {
             }
         }
     }
-
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
