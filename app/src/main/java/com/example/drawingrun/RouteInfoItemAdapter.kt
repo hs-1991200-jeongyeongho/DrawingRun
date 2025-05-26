@@ -1,5 +1,8 @@
 package com.example.drawingrun
 
+import android.graphics.drawable.GradientDrawable
+
+
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,14 +40,18 @@ class RouteInfoItemAdapter(
         holder.titleText.text = item.title
         holder.descText.text = item.description
 
-        // 선택 강조 색상 처리
-        val context = holder.itemView.context
-        holder.itemView.setBackgroundColor(
-            if (position == selectedIndex)
-                ContextCompat.getColor(context, android.R.color.darker_gray)
-            else
-                ContextCompat.getColor(context, android.R.color.transparent)
-        )
+        // 선택 강조 스타일 (크기 확대 + 그림자)
+        holder.itemView.scaleX = if (position == selectedIndex) 1.05f else 1.0f
+        holder.itemView.scaleY = if (position == selectedIndex) 1.05f else 1.0f
+        holder.itemView.elevation = if (position == selectedIndex) 8f else 0f
+        val border = GradientDrawable().apply {
+
+            setColor(android.graphics.Color.TRANSPARENT)
+            setStroke(4, android.graphics.Color.parseColor("#FF6700"))  // 시작 버튼과 동일한 색상
+            cornerRadius = 20f
+        }
+
+        holder.itemView.background = if (position == selectedIndex) border else null
 
         holder.itemView.setOnClickListener {
             val previousIndex = selectedIndex

@@ -144,7 +144,8 @@ class DrawingActivity : BaseActivity(), OnMapReadyCallback {
                 polyline.color = if (polyline == clicked) Color.RED else Color.MAGENTA
                 polyline.width = if (polyline == clicked) 18f else 14f
                 if (polyline == clicked) {
-                    routeInfoRecycler.smoothScrollToPosition(index)
+                    val layoutManager = routeInfoRecycler.layoutManager as? LinearLayoutManager
+                    layoutManager?.scrollToPositionWithOffset(index, 100)
                     routeInfoAdapter?.highlightItemAt(index)
                     selectedRoutePoints = polyline.points
                 }
@@ -258,6 +259,10 @@ class DrawingActivity : BaseActivity(), OnMapReadyCallback {
                 }
 
                 selectedRoutePoints = selectedItem.points
+
+                val selectedIndex = routeItems.indexOfFirst { it.points == selectedItem.points }
+                val layoutManager = routeInfoRecycler.layoutManager as? LinearLayoutManager
+                layoutManager?.scrollToPositionWithOffset(selectedIndex, 100)
             }
             routeInfoRecycler.adapter = routeInfoAdapter
         }
