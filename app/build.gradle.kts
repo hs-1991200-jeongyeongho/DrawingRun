@@ -47,6 +47,7 @@ android {
 
 dependencies {
 
+    implementation("androidx.cardview:cardview:1.0.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -84,4 +85,9 @@ dependencies {
     implementation ("androidx.compose.material3:material3:1.2.1")
     implementation ("androidx.compose.material:material-icons-extended")
     implementation(platform("androidx.compose:compose-bom:2024.03.00"))
+    implementation ("androidx.slidingpanelayout:slidingpanelayout:1.2.0")
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
+    implementation ("androidx.gridlayout:gridlayout:1.0.0")
+    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 }

@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.location.Location
 import android.os.Bundle
 import android.os.Handler
@@ -36,6 +35,7 @@ class RunningActivity : BaseActivity(), OnMapReadyCallback {
     private lateinit var locationRequest: LocationRequest
     private var pathPolyline: Polyline? = null
     private val runningPath = mutableListOf<LatLng>()
+    private var initialBounds: LatLngBounds? = null
 
     private var isRunning = false
     private var startTime = 0L
@@ -131,8 +131,8 @@ class RunningActivity : BaseActivity(), OnMapReadyCallback {
     }
 
     private fun onRunEndedDirectly() {
-        handler.removeCallbacks(timerRunnable)
         fusedLocationClient.removeLocationUpdates(locationCallback)
+        handler.removeCallbacks(timerRunnable)
 
         val endTimeMillis = System.currentTimeMillis()
         val durationSeconds = (elapsedTime + (if (isRunning) endTimeMillis - startTime else 0L)) / 1000.0
@@ -152,12 +152,25 @@ class RunningActivity : BaseActivity(), OnMapReadyCallback {
         val calories = mets * weight * durationHours
         val timeFormatted = String.format("%.0f분 %.0f초", durationSeconds / 60, durationSeconds % 60)
 
-
         captureScreenAndNavigate(calories, timeFormatted, distanceKm)
     }
 
     private fun captureScreenAndNavigate(calories: Double, time: String, distance: Double) {
         val dateFormatted = SimpleDateFormat("yyyy.MM.dd", Locale.getDefault()).format(Date())
+
+        val bounds = initialBounds ?: run {
+            Toast.makeText(this, "초기 카메라 위치를 불러올 수 없습니다", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        try {
+            mMap.isMyLocationEnabled = false
+            mMap.uiSettings.isMyLocationButtonEnabled = false
+        } catch (e: SecurityException) {
+            e.printStackTrace()
+        }
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100))
 
         mMap.setOnMapLoadedCallback {
             mMap.snapshot { bitmap ->
@@ -182,7 +195,6 @@ class RunningActivity : BaseActivity(), OnMapReadyCallback {
         }
     }
 
-
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         mMap.uiSettings.isZoomControlsEnabled = true
@@ -199,6 +211,8 @@ class RunningActivity : BaseActivity(), OnMapReadyCallback {
             val bounds = LatLngBounds.builder().apply {
                 selectedRoutePoints.forEach { include(it) }
             }.build()
+
+            initialBounds = bounds
 
             val mapView = (supportFragmentManager.findFragmentById(R.id.running_map) as SupportMapFragment).view
             mapView?.viewTreeObserver?.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {

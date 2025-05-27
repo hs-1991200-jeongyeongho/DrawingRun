@@ -1,71 +1,134 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- 지도 Fragment (맨 뒤에 깔림) -->
-    <fragment
-        android:id="@+id/map"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-    <!-- 툴바 (상단 고정) -->
+    <!-- ✅ 툴바는 항상 최상단 -->
     <include
         layout="@layout/toolbar_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <!-- 그림판 (필요할 때만 보임) -->
-    <LinearLayout
-        android:id="@+id/drawing_layout"
+    <!-- ✅ 지도 + 사이드바 + 하단 리스트 포함 -->
+    <com.example.drawingrun.CustomDrawerLayout
+        android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:layout_gravity="bottom"
-        android:orientation="vertical"
-        android:visibility="gone"
-        android:padding="8dp"
-        android:background="@color/bg_light">
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
-        <com.example.drawingrun.DrawingView
-            android:id="@+id/drawing_view"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@android:color/white" />
-    </LinearLayout>
+            android:orientation="vertical"
+            android:background="@android:color/transparent">
 
-    <!--커스텀 버튼-->
-    <FrameLayout
-        android:id="@+id/btn_start_running"
-        android:layout_width="96dp"
-        android:layout_height="96dp"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="28dp"
-        android:background="@drawable/bg_round_orange"
-        android:clickable="true"
-        android:focusable="true"
-        android:elevation="12dp">
+            <!-- 지도 영역 -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
 
-        <TextView
-            android:layout_width="match_parent"
+                <fragment
+                    android:id="@+id/map"
+                    android:name="com.google.android.gms.maps.SupportMapFragment"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/guide_message_card"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_gravity="top|center_horizontal"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="8dp"
+                    app:cardBackgroundColor="@android:color/white">
+
+                    <TextView
+                        android:id="@+id/guide_message"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="왼쪽에서 그림을 선택해주세요!"
+                        android:textSize="16sp"
+                        android:textColor="#000000"
+                        android:padding="16dp"/>
+                </androidx.cardview.widget.CardView>
+
+                <ImageButton
+                    android:id="@+id/btn_toggle_sidebar_closed"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:layout_gravity="center_vertical|start"
+                    android:layout_marginStart="-16dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:padding="8dp"
+                    android:src="@drawable/chevron_right"
+                    android:contentDescription="사이드바 열기" />
+
+                <FrameLayout
+                    android:id="@+id/btn_start_running"
+                    android:layout_width="96dp"
+                    android:layout_height="96dp"
+                    android:layout_gravity="bottom|center_horizontal"
+                    android:layout_marginBottom="28dp"
+                    android:background="@drawable/bg_round_orange"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:elevation="12dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="시작"
+                        android:textSize="22sp"
+                        android:textColor="@android:color/white"
+                        android:fontFamily="@font/spoqa_han_sans_bold" />
+                </FrameLayout>
+            </FrameLayout>
+
+            <!-- ✅ 하단 경로 리스트 -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_route_info"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_marginStart="95dp"
+                android:visibility="gone"
+                android:padding="8dp"
+                android:scrollbars="vertical"
+                android:background="@android:color/transparent" />
+        </LinearLayout>
+
+        <!-- 사이드바 -->
+        <FrameLayout
+            android:id="@+id/label_menu"
+            android:layout_width="95dp"
             android:layout_height="match_parent"
-            android:gravity="center"
-            android:text="시작"
-            android:textSize="22sp"
-            android:textColor="@android:color/white"
-            android:fontFamily="@font/spoqa_han_sans_bold"/>
-    </FrameLayout>
+            android:layout_gravity="start"
+            android:clickable="false"
+            android:focusable="false"
+            android:elevation="16dp"
+            android:descendantFocusability="blocksDescendants">
 
-    <!-- 떠다니는 버튼 (우측 하단) -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_drawing"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="96dp"
-        android:elevation="16dp"
-        android:src="@drawable/ic_note"
-        app:backgroundTint="#FFA726"
-        app:tint="@android:color/white" />
-</FrameLayout>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_labels"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="2dp"
+                android:background="#00000000" />
+
+            <ImageButton
+                android:id="@+id/btn_toggle_sidebar_open"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_gravity="center_vertical|end"
+                android:layout_marginEnd="-16dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="8dp"
+                android:src="@drawable/chevron_left"
+                android:contentDescription="사이드바 닫기" />
+        </FrameLayout>
+    </com.example.drawingrun.CustomDrawerLayout>
+</LinearLayout>
