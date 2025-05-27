@@ -13,6 +13,8 @@
     import androidx.core.app.ActivityCompat
     import androidx.core.view.GravityCompat
     import androidx.drawerlayout.widget.DrawerLayout
+    import android.util.Log
+    import androidx.lifecycle.lifecycleScope
     import androidx.recyclerview.widget.GridLayoutManager
     import androidx.recyclerview.widget.LinearLayoutManager
     import androidx.recyclerview.widget.RecyclerView
@@ -24,6 +26,10 @@
     import com.google.android.gms.maps.model.*
     import com.google.firebase.firestore.FirebaseFirestore
     import com.google.firebase.firestore.GeoPoint
+    import kotlinx.coroutines.Job
+    import kotlinx.coroutines.launch
+    import kotlinx.coroutines.delay
+    import kotlin.math.*
 
     class DrawingActivity : BaseActivity(), OnMapReadyCallback {
 
@@ -46,6 +52,10 @@
         private var routeInfoAdapter: RouteInfoItemAdapter? = null
 
         private var selectedRoutePoints: List<LatLng>? = null
+
+        private var mockRunnerCircle: Circle? = null
+        private var mockRunningJob: Job? = null
+        private var tracePolyline: Polyline? = null
 
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
@@ -140,17 +150,37 @@
 
             mMap.setOnPolylineClickListener { clicked ->
                 selectedRoute = clicked
+                selectedRoutePoints = clicked.points
+
+                // ✅ 전체 확대 처리 (mapView.post 이용)
+                val boundsBuilder = LatLngBounds.Builder()
+                clicked.points.forEach { boundsBuilder.include(it) }
+                val bounds = boundsBuilder.build()
+                val padding = 250
+
+                // 지도가 레이아웃에 완전히 그려진 이후에 카메라 이동
+                (supportFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment)?.view?.post {
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding))
+                }
+
+                // ✅ 경로 강조 및 리스트 스크롤
                 routePolylines.forEachIndexed { index, polyline ->
                     polyline.color = if (polyline == clicked) Color.RED else Color.MAGENTA
                     polyline.width = if (polyline == clicked) 18f else 14f
+
                     if (polyline == clicked) {
                         val layoutManager = routeInfoRecycler.layoutManager as? LinearLayoutManager
                         layoutManager?.scrollToPositionWithOffset(index, 100)
                         routeInfoAdapter?.highlightItemAt(index)
-                        selectedRoutePoints = polyline.points
                     }
                 }
+
+                // ✅ 점 애니메이션 실행
+                startMockRunningAnimation(clicked.points)
             }
+
+
+
         }
 
         private fun requestLastLocation() {
@@ -167,6 +197,96 @@
                 }
             }
         }
+
+        private fun startMockRunningAnimation(points: List<LatLng>) {
+            if (points.size < 2) {
+                Log.d("MockRun", "애니메이션 시작 실패: point 부족")
+                return
+            }
+
+            // 이전 점/경로 제거
+            mockRunnerCircle?.remove()
+            mockRunnerCircle = null
+            mockRunningJob?.cancel()
+            mockRunningJob = null
+            tracePolyline?.remove()
+            tracePolyline = null
+
+            // 새 점 생성
+            mockRunnerCircle = mMap.addCircle(
+                CircleOptions()
+                    .center(points[0])
+                    .radius(9.0)
+                    .strokeColor(Color.BLUE)
+                    .fillColor(Color.BLUE)
+                    .zIndex(10f)
+            )
+
+            // 잔상용 polyline 생성
+            tracePolyline = mMap.addPolyline(
+                PolylineOptions()
+                    .color(Color.GREEN)
+                    .width(11f)
+                    .zIndex(9f)
+            )
+
+            val loopedPoints = if (points.first() != points.last()) points + points.first() else points
+
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(loopedPoints[0], 17f))
+
+            mockRunningJob = lifecycleScope.launch {
+                val trace = mutableListOf<LatLng>()
+                trace.add(loopedPoints[0]) // 시작점 포함
+
+                val speedMps = 250.0  // 초당 2m 이동
+                val delayMillis = 30L
+                val stepDurationSec = delayMillis / 1000.0  // 0.05초
+
+                for (i in 1 until loopedPoints.size) {
+                    val start = loopedPoints[i - 1]
+                    val end = loopedPoints[i]
+
+                    // 거리 계산
+                    val result = FloatArray(1)
+                    Location.distanceBetween(
+                        start.latitude, start.longitude,
+                        end.latitude, end.longitude,
+                        result
+                    )
+                    val segmentDistance = result[0] // in meters
+
+                    // 해당 구간의 steps 계산 (거리 ÷ 속도 × 프레임 시간)
+                    val steps = maxOf(1, (segmentDistance / (speedMps * stepDurationSec)).toInt())
+
+                    for (step in 1..steps) {
+                        val lat = start.latitude + (end.latitude - start.latitude) * step / steps
+                        val lng = start.longitude + (end.longitude - start.longitude) * step / steps
+                        val nextPos = LatLng(lat, lng)
+
+                        mockRunnerCircle?.center = nextPos
+                        trace.add(nextPos)
+                        tracePolyline?.points = trace
+
+                        delay(delayMillis)
+                    }
+                }
+            }
+        }
+
+        private fun resetMockRunner() {
+            mockRunnerCircle?.remove()
+            mockRunnerCircle = null
+
+            tracePolyline?.remove()
+            tracePolyline = null
+
+            mockRunningJob?.cancel()
+            mockRunningJob = null
+        }
+
+
+
+
 
         private fun fetchAndDisplayLabelIcons() {
             db.collection("route").get().addOnSuccessListener { documents ->
@@ -191,7 +311,12 @@
                     }
 
                     labelRecycler.adapter = LabelAdapter(items) { item ->
+                        // ✅ 기존 경로, 애니메이션 초기화
+                        resetMockRunner()
+
+                        // ✅ 경로 불러오기
                         loadPolylineFromFirestore(item.label, item.labelKr)
+
                         guideCard.visibility = View.GONE
                         routeInfoRecycler.visibility = View.VISIBLE
                     }
@@ -244,9 +369,18 @@
                 }
 
                 routeInfoAdapter = RouteInfoItemAdapter(routeItems) { selectedItem ->
-                    val center = selectedItem.points.firstOrNull() ?: return@RouteInfoItemAdapter
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(center, 15f))
 
+                    // ✅ 전체 경로 확대 (뷰 그려진 이후 실행)
+                    val boundsBuilder = LatLngBounds.Builder()
+                    selectedItem.points.forEach { boundsBuilder.include(it) }
+                    val bounds = boundsBuilder.build()
+                    val padding = 250
+
+                    (supportFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment)?.view?.post {
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding))
+                    }
+
+                    // ✅ 경로 강조
                     selectedRouteFromList = null
                     routePolylines.forEach {
                         it.color = Color.MAGENTA
@@ -263,7 +397,11 @@
                     val selectedIndex = routeItems.indexOfFirst { it.points == selectedItem.points }
                     val layoutManager = routeInfoRecycler.layoutManager as? LinearLayoutManager
                     layoutManager?.scrollToPositionWithOffset(selectedIndex, 100)
+
+                    startMockRunningAnimation(selectedItem.points)
                 }
+
+
                 routeInfoRecycler.adapter = routeInfoAdapter
             }
         }
