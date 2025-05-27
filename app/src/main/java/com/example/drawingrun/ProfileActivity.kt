@@ -62,14 +62,14 @@ class ProfileActivity : AppCompatActivity() {
                     val age = document.getLong("age")?.toString() ?: "미입력"
                     val height = document.getDouble("height")?.toString() ?: "미입력"
                     val weight = document.getDouble("weight")?.toString() ?: "미입력"
-                    val distance = document.getDouble("distance")?.toString() ?: "0"
+                    val distance = document.getDouble("totalDistance") ?: 0.0
                     val shapes = document.getLong("shapeCount")?.toString() ?: "0"
 
                     tvName.text = name
                     tvAge.text = "나이: $age"
                     tvHeight.text = "키: $height cm"
                     tvWeight.text = "몸무게: $weight kg"
-                    tvDistance.text = "누적 달린 거리: $distance km"
+                    tvDistance.text = "누적 달린 거리: %.2f km".format(distance)
                     tvShapes.text = "만든 도형 수: $shapes"
                 }
             }

@@ -1,8 +1,11 @@
 package com.example.drawingrun
 
+import android.app.AlertDialog
 import android.content.ContentValues
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.provider.MediaStore
 import android.widget.Button
@@ -10,12 +13,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import java.io.File
-import android.app.AlertDialog
-import android.content.Intent
-import java.io.FileOutputStream
 
 class WorkoutResultActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_workout_summary)
@@ -45,13 +45,21 @@ class WorkoutResultActivity : AppCompatActivity() {
                 .setTitle("이미지 저장")
                 .setMessage("이미지를 저장하시겠습니까?")
                 .setPositiveButton("확인") { _, _ ->
-                    imageView.isDrawingCacheEnabled = true
-                    val bitmap = imageView.drawingCache
-                    val file = File(cacheDir, "saved_image_${System.currentTimeMillis()}.png")
-                    FileOutputStream(file).use {
-                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+                    val drawable = imageView.drawable
+                    val bitmap = (drawable as? BitmapDrawable)?.bitmap
+
+                    if (bitmap != null) {
+                        val filename = "drawing_result_${System.currentTimeMillis()}.png"
+                        val uri = saveBitmapToGallery(bitmap, filename)
+
+                        if (uri != null) {
+                            Toast.makeText(this, "갤러리에 이미지가 저장되었습니다", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(this, "이미지 저장 실패", Toast.LENGTH_SHORT).show()
+                        }
+                    } else {
+                        Toast.makeText(this, "이미지가 유효하지 않습니다", Toast.LENGTH_SHORT).show()
                     }
-                    Toast.makeText(this, "이미지가 저장되었습니다", Toast.LENGTH_SHORT).show()
 
                     val intent = Intent(this, WorkoutSummaryActivity::class.java).apply {
                         putExtra("distance", distance)
@@ -83,13 +91,11 @@ class WorkoutResultActivity : AppCompatActivity() {
         }
     }
 
-
-
     private fun saveBitmapToGallery(bitmap: Bitmap, filename: String): android.net.Uri? {
         val contentValues = ContentValues().apply {
             put(MediaStore.Images.Media.DISPLAY_NAME, filename)
             put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-            put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/DrawingRun")
+            put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/DrawingRun") // Android 10 이상
             put(MediaStore.Images.Media.IS_PENDING, 1)
         }
 
