@@ -310,16 +310,25 @@
                         LabelAdapter.LabelItem(label, labelKr, iconUrl)
                     }
 
-                    labelRecycler.adapter = LabelAdapter(items) { item ->
-                        // ✅ 기존 경로, 애니메이션 초기화
-                        resetMockRunner()
+                    labelRecycler.adapter = LabelAdapter(
+                        items,
+                        onClick = { item ->
+                            // ✅ 기존 경로, 애니메이션 초기화
+                            resetMockRunner()
 
-                        // ✅ 경로 불러오기
-                        loadPolylineFromFirestore(item.label, item.labelKr)
+                            // ✅ 경로 불러오기
+                            loadPolylineFromFirestore(item.label, item.labelKr)
 
-                        guideCard.visibility = View.GONE
-                        routeInfoRecycler.visibility = View.VISIBLE
-                    }
+                            guideCard.visibility = View.GONE
+                            routeInfoRecycler.visibility = View.VISIBLE
+                        },
+                        onAddClick = {
+                            // ✅ + 버튼 눌렀을 때 처리
+                            Toast.makeText(this, "경로 추가 화면으로 이동할 수 있습니다.", Toast.LENGTH_SHORT).show()
+                            // 또는 startActivity(Intent(this, AddRouteActivity::class.java))
+                        }
+                    )
+
                 }
             }
         }

@@ -17,7 +17,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="삼각형"
-        android:textSize="7sp"
+        android:textSize="3sp"
         android:textColor="#333333"
         android:gravity="center"
         android:paddingTop="0dp" />
