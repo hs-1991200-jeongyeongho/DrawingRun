@@ -71,6 +71,10 @@
             android:name=".WorkoutSummaryActivity"
             android:theme="@style/Theme.DrawingRun" />
 
+        <activity
+            android:name=".AddRouteActivity"
+            android:theme="@style/Theme.DrawingRun" />
+
 
 
         <activity

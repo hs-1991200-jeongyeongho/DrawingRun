@@ -289,54 +289,79 @@
 
 
         private fun fetchAndDisplayLabelIcons() {
-            db.collection("route").get().addOnSuccessListener { documents ->
-                val labelMap = linkedMapOf<String, String>()
-                for (doc in documents) {
+            val routeLabelMap = linkedMapOf<String, String>()
+
+            // 1. 기본 route 라벨 불러오기
+            db.collection("route").get().addOnSuccessListener { routeDocs ->
+                for (doc in routeDocs) {
                     val label = doc.getString("label")?.lowercase() ?: continue
                     val labelKr = doc.getString("label_kr") ?: continue
-                    if (!labelMap.containsKey(label)) labelMap[label] = labelKr
+                    routeLabelMap[label] = labelKr
                 }
 
-                db.collection("label_icon").get().addOnSuccessListener { iconDocs ->
-                    val iconMap = mutableMapOf<String, String>()
-                    for (doc in iconDocs) {
-                        val iconURL = doc.getString("iconURL") ?: continue
-                        val iconId = doc.id.removePrefix("icon_").lowercase()
-                        iconMap[iconId] = iconURL
-                    }
-
-                    val items = labelMap.mapNotNull { (label, labelKr) ->
-                        val iconUrl = iconMap[label] ?: return@mapNotNull null
-                        LabelAdapter.LabelItem(label, labelKr, iconUrl)
-                    }
-
-                    labelRecycler.adapter = LabelAdapter(
-                        items,
-                        onClick = { item ->
-                            // ✅ 기존 경로, 애니메이션 초기화
-                            resetMockRunner()
-
-                            // ✅ 경로 불러오기
-                            loadPolylineFromFirestore(item.label, item.labelKr)
-
-                            guideCard.visibility = View.GONE
-                            routeInfoRecycler.visibility = View.VISIBLE
-                        },
-                        onAddClick = {
-                            // ✅ + 버튼 눌렀을 때 처리
-                            Toast.makeText(this, "경로 추가 화면으로 이동할 수 있습니다.", Toast.LENGTH_SHORT).show()
-                            // 또는 startActivity(Intent(this, AddRouteActivity::class.java))
+                // 2. 사용자 routes 라벨 불러오기
+                db.collection("routes").get().addOnSuccessListener { userDocs ->
+                    for (doc in userDocs) {
+                        val label = doc.getString("label")?.lowercase() ?: continue
+                        val labelKr = doc.getString("label_kr") ?: continue
+                        if (!routeLabelMap.containsKey(label)) {
+                            routeLabelMap[label] = labelKr
                         }
-                    )
+                    }
 
+                    // 3. 아이콘 가져오기 (label_icon)
+                    db.collection("label_icon").get().addOnSuccessListener { iconDocs ->
+                        val iconMap = mutableMapOf<String, String>()
+                        for (doc in iconDocs) {
+                            val iconId = doc.id.removePrefix("icon_").lowercase()
+                            val iconUrl = doc.getString("iconURL") ?: continue
+                            iconMap[iconId] = iconUrl
+                        }
+
+                        // 4. 최종 라벨 아이템 리스트 생성
+                        val items = routeLabelMap.mapNotNull { (label, labelKr) ->
+                            val iconUrl = iconMap[label] ?: return@mapNotNull null
+                            LabelAdapter.LabelItem(label, labelKr, iconUrl)
+                        }
+
+                        // 5. LabelAdapter 연결
+                        // 🔹 기본 라벨들 정의 (route 컬렉션 기준)
+                        val baseLabels = setOf("triangle", "square", "fork", "hand", "butterfly", "nail",
+                            "key") // 네 앱에 맞게 수정 가능
+
+                        labelRecycler.adapter = LabelAdapter(
+                            items,
+                            onClick = { item ->
+                                resetMockRunner()
+
+                                if (baseLabels.contains(item.label.lowercase())) {
+                                    loadPolylineFromFirestore(item.label, item.labelKr)
+                                } else {
+                                    loadPolylineFromUserRoutes(item.label, item.labelKr)
+                                }
+
+                                guideCard.visibility = View.GONE
+                                routeInfoRecycler.visibility = View.VISIBLE
+                            },
+                            onAddClick = {
+                                val intent = Intent(this, AddRouteActivity::class.java)
+                                startActivity(intent)
+                            }
+                        )
+
+                    }
                 }
             }
         }
 
         private fun loadPolylineFromFirestore(label: String, labelKr: String) {
             val lowercaseLabel = label.lowercase()
-            db.collection("route").whereEqualTo("label", lowercaseLabel).get().addOnSuccessListener { documents ->
-                if (documents.isEmpty) return@addOnSuccessListener
+            db.collection("route").get().addOnSuccessListener { documents ->
+                val filteredDocs = documents.filter {
+                    it.getString("label")?.lowercase() == lowercaseLabel
+                }
+
+                if (filteredDocs.isEmpty()) return@addOnSuccessListener
 
                 routePolylines.forEach { it.remove() }
                 routePolylines.clear()
@@ -346,7 +371,7 @@
 
                 val routeItems = mutableListOf<RouteInfoItemAdapter.RouteInfoItem>()
 
-                documents.forEachIndexed { index, doc ->
+                filteredDocs.forEachIndexed { index, doc ->  // ✅ 요기만 바꾸면 됨
                     val geoPoints = doc["points"] as? List<GeoPoint> ?: return@forEachIndexed
                     val latLngList = geoPoints.map { LatLng(it.latitude, it.longitude) }
 
@@ -356,11 +381,6 @@
                     polyline.tag = doc.id
                     routePolylines.add(polyline)
 
-                    //if (index == 0) {
-                    //    selectedRoutePoints = latLngList
-                    //    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLngList.first(), 15f))
-                    //}
-
                     val distance = doc.getDouble("distance") ?: 0.0
 
                     val userDistanceText = lastLocation?.let {
@@ -369,17 +389,15 @@
                     } ?: "🚶 현재 위치 정보 없음"
 
                     val description = """
-                        📏 거리: ${"%.2f".format(distance)} km
-                        $userDistanceText
-                    """.trimIndent()
+                📏 거리: ${"%.2f".format(distance)} km
+                $userDistanceText
+            """.trimIndent()
 
                     val title = "$labelKr ${index + 1}"
                     routeItems.add(RouteInfoItemAdapter.RouteInfoItem(title, description, latLngList))
                 }
 
                 routeInfoAdapter = RouteInfoItemAdapter(routeItems) { selectedItem ->
-
-                    // ✅ 전체 경로 확대 (뷰 그려진 이후 실행)
                     val boundsBuilder = LatLngBounds.Builder()
                     selectedItem.points.forEach { boundsBuilder.include(it) }
                     val bounds = boundsBuilder.build()
@@ -389,7 +407,6 @@
                         mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding))
                     }
 
-                    // ✅ 경로 강조
                     selectedRouteFromList = null
                     routePolylines.forEach {
                         it.color = Color.MAGENTA
@@ -410,10 +427,94 @@
                     startMockRunningAnimation(selectedItem.points)
                 }
 
-
                 routeInfoRecycler.adapter = routeInfoAdapter
             }
         }
+
+
+        private fun loadPolylineFromUserRoutes(label: String, labelKr: String) {
+            db.collection("routes")
+                .whereEqualTo("label", label.lowercase())
+                .get()
+                .addOnSuccessListener { documents ->
+                    if (documents.isEmpty) return@addOnSuccessListener
+
+                    routePolylines.forEach { it.remove() }
+                    routePolylines.clear()
+                    selectedRoute = null
+                    selectedRouteFromList = null
+                    selectedRoutePoints = null
+
+                    val routeItems = mutableListOf<RouteInfoItemAdapter.RouteInfoItem>()
+
+                    documents.forEachIndexed { index, doc ->
+                        val geoPoints = doc["points"] as? List<GeoPoint> ?: return@forEachIndexed
+                        val latLngList = geoPoints.map { LatLng(it.latitude, it.longitude) }
+
+                        val polyline = mMap.addPolyline(
+                            PolylineOptions()
+                                .addAll(latLngList)
+                                .color(Color.MAGENTA)
+                                .width(14f)
+                                .clickable(true)
+                        )
+                        polyline.tag = doc.id
+                        routePolylines.add(polyline)
+
+                        val distance = doc.getDouble("distance") ?: 0.0
+                        val userDistanceText = lastLocation?.let {
+                            val minDistance = DistanceUtils.calculateMinDistanceToRoute(it, latLngList)
+                            "🚶 내 위치에서 거리: ${DistanceUtils.formatDistance(minDistance)}"
+                        } ?: "🚶 현재 위치 정보 없음"
+
+                        val description = """
+                    📏 거리: ${"%.2f".format(distance)} km
+                    $userDistanceText
+                """.trimIndent()
+
+                        val title = "$labelKr ${index + 1}"
+                        routeItems.add(RouteInfoItemAdapter.RouteInfoItem(title, description, latLngList))
+                    }
+
+                    routeInfoAdapter = RouteInfoItemAdapter(routeItems) { selectedItem ->
+                        val boundsBuilder = LatLngBounds.Builder()
+                        selectedItem.points.forEach { boundsBuilder.include(it) }
+                        val bounds = boundsBuilder.build()
+                        val padding = 250
+
+                        (supportFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment)?.view?.post {
+                            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding))
+                        }
+
+                        selectedRouteFromList = null
+                        routePolylines.forEach {
+                            it.color = Color.MAGENTA
+                            it.width = 14f
+                            if (it.points == selectedItem.points) {
+                                it.color = Color.RED
+                                it.width = 18f
+                                selectedRouteFromList = it
+                            }
+                        }
+
+                        selectedRoutePoints = selectedItem.points
+
+                        val selectedIndex = routeItems.indexOfFirst { it.points == selectedItem.points }
+                        val layoutManager = routeInfoRecycler.layoutManager as? LinearLayoutManager
+                        layoutManager?.scrollToPositionWithOffset(selectedIndex, 100)
+
+                        startMockRunningAnimation(selectedItem.points)
+                    }
+
+                    routeInfoRecycler.adapter = routeInfoAdapter
+                }
+        }
+
+        override fun onResume() {
+            super.onResume()
+            fetchAndDisplayLabelIcons()
+        }
+
 
         override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults)
