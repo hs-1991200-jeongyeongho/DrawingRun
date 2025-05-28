@@ -24,6 +24,7 @@
     import com.google.android.gms.maps.OnMapReadyCallback
     import com.google.android.gms.maps.SupportMapFragment
     import com.google.android.gms.maps.model.*
+    import com.google.firebase.auth.FirebaseAuth
     import com.google.firebase.firestore.FirebaseFirestore
     import com.google.firebase.firestore.GeoPoint
     import kotlinx.coroutines.Job
@@ -433,11 +434,17 @@
 
 
         private fun loadPolylineFromUserRoutes(label: String, labelKr: String) {
+            val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
             db.collection("routes")
                 .whereEqualTo("label", label.lowercase())
+                .whereEqualTo("userId", currentUserId) // ✅ 현재 사용자만 필터링
                 .get()
                 .addOnSuccessListener { documents ->
-                    if (documents.isEmpty) return@addOnSuccessListener
+                    if (documents.isEmpty) {
+                        Toast.makeText(this, "내가 만든 경로가 없습니다.", Toast.LENGTH_SHORT).show()
+                        return@addOnSuccessListener
+                    }
 
                     routePolylines.forEach { it.remove() }
                     routePolylines.clear()
@@ -509,6 +516,7 @@
                     routeInfoRecycler.adapter = routeInfoAdapter
                 }
         }
+
 
         override fun onResume() {
             super.onResume()

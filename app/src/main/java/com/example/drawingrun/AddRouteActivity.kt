@@ -136,7 +136,8 @@ class AddRouteActivity : AppCompatActivity(), OnMapReadyCallback {
             val items = snapshot.mapNotNull { doc ->
                 val id = doc.id.removePrefix("icon_")
                 val url = doc.getString("iconURL") ?: return@mapNotNull null
-                LabelAdapter.LabelItem(id, id, url)
+                val labelKr = doc.getString("label_kr") ?: id  // 없으면 영어 아이디로 fallback
+                LabelAdapter.LabelItem(id, labelKr, url)
             }
 
             var selectedItem: LabelAdapter.LabelItem? = null
