@@ -5,6 +5,7 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 
 class EditProfileActivity : AppCompatActivity() {
 
@@ -50,7 +51,7 @@ class EditProfileActivity : AppCompatActivity() {
         FirebaseFirestore.getInstance()
             .collection("users")
             .document(uid)
-            .set(data)
+            .set(data, SetOptions.merge())  // 🔥 merge() 추가
             .addOnSuccessListener {
                 setResult(RESULT_OK)
                 Toast.makeText(this, "저장 완료", Toast.LENGTH_SHORT).show()

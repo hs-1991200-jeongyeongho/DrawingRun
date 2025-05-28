@@ -6,13 +6,13 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Button
-import android.widget.ImageView
 import android.widget.TextView
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.example.drawingrun.LoginActivity
 
 class ProfileActivity : AppCompatActivity() {
 
@@ -21,8 +21,7 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var tvHeight: TextView
     private lateinit var tvWeight: TextView
     private lateinit var tvDistance: TextView
-    private lateinit var tvShapes: TextView
-    private lateinit var ivProfile: ImageView
+    private lateinit var editProfileLauncher: ActivityResultLauncher<Intent> // 🔧 선언만
 
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
@@ -31,22 +30,30 @@ class ProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
 
+        // 🔐 launcher 초기화
+        editProfileLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                loadUserProfile()
+            }
+        }
+
         // 툴바 설정
         val toolbar = findViewById<Toolbar>(R.id.profileToolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
+        // 뷰 바인딩
         tvName = findViewById(R.id.tvUserName)
         tvAge = findViewById(R.id.tvUserAge)
         tvHeight = findViewById(R.id.tvUserHeight)
         tvWeight = findViewById(R.id.tvUserWeight)
         tvDistance = findViewById(R.id.tvTotalDistance)
-        tvShapes = findViewById(R.id.tvShapeCount)
 
+        // 프로필 수정 버튼
         val editButton = findViewById<Button>(R.id.btnEditProfile)
         editButton.setOnClickListener {
             val intent = Intent(this, EditProfileActivity::class.java)
-            startActivity(intent)
+            editProfileLauncher.launch(intent) // ✅ 안전한 방식
         }
 
         loadUserProfile()
@@ -63,14 +70,12 @@ class ProfileActivity : AppCompatActivity() {
                     val height = document.getDouble("height")?.toString() ?: "미입력"
                     val weight = document.getDouble("weight")?.toString() ?: "미입력"
                     val distance = document.getDouble("totalDistance") ?: 0.0
-                    val shapes = document.getLong("shapeCount")?.toString() ?: "0"
 
                     tvName.text = name
                     tvAge.text = "나이: $age"
                     tvHeight.text = "키: $height cm"
                     tvWeight.text = "몸무게: $weight kg"
                     tvDistance.text = "누적 달린 거리: %.2f km".format(distance)
-                    tvShapes.text = "만든 도형 수: $shapes"
                 }
             }
             .addOnFailureListener {
@@ -78,32 +83,25 @@ class ProfileActivity : AppCompatActivity() {
             }
     }
 
-
-    // 메뉴 연결
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_profile, menu)
         return true
     }
 
-    // 로그아웃 메뉴 클릭 처리
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
-                onBackPressed() // 또는 finish()
+                onBackPressed()
                 true
             }
-
             R.id.action_logout -> {
                 showLogoutDialog()
                 true
             }
-
             else -> super.onOptionsItemSelected(item)
         }
     }
 
-
-    // 로그아웃 확인 다이얼로그
     private fun showLogoutDialog() {
         val dialog = AlertDialog.Builder(this)
             .setTitle("로그아웃")
@@ -117,10 +115,8 @@ class ProfileActivity : AppCompatActivity() {
             .create()
 
         dialog.setOnShowListener {
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                ?.setTextColor(getColor(R.color.blue_confirm)) // 파란색
-            dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
-                ?.setTextColor(getColor(R.color.red_cancel))   // 빨간색
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(getColor(R.color.blue_confirm))
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(getColor(R.color.red_cancel))
         }
 
         dialog.show()
