@@ -27,8 +27,10 @@ import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt
+import kotlinx.coroutines.*
 
-class RunningActivity : BaseActivity(), OnMapReadyCallback {
+
+class RunningActivity : BaseActivity(), OnMapReadyCallback, CoroutineScope by MainScope() {
     private lateinit var mMap: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
@@ -53,6 +55,9 @@ class RunningActivity : BaseActivity(), OnMapReadyCallback {
 
     private var lastLocation: Location? = null
     private var weight: Double = 60.0
+
+    // GPS 보정 임계값 상수로 분리
+    private val distanceThresholdMeters = 8.0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -232,29 +237,75 @@ class RunningActivity : BaseActivity(), OnMapReadyCallback {
             override fun onLocationResult(result: LocationResult) {
                 if (!isRunning) return
 
+                val selectedRoutePoints = intent.getParcelableArrayListExtra<LatLng>("selected_route_points")
+
                 for (location in result.locations) {
-                    val latLng = LatLng(location.latitude, location.longitude)
-                    runningPath.add(latLng)
+                    val originalLatLng = LatLng(location.latitude, location.longitude)
 
-                    if (pathPolyline == null) {
-                        pathPolyline = mMap.addPolyline(PolylineOptions().add(latLng).color(0xFF00FF00.toInt()).width(8f))
-                    } else {
-                        pathPolyline?.points = runningPath
-                    }
+                    launch(Dispatchers.Default) {
+                        val correctedLatLng = if (!selectedRoutePoints.isNullOrEmpty()) {
+                            val nearestPoint = findNearestPointOnRoute(originalLatLng, selectedRoutePoints)
+                            val distanceToRoute = FloatArray(1)
+                            Location.distanceBetween(
+                                originalLatLng.latitude, originalLatLng.longitude,
+                                nearestPoint.latitude, nearestPoint.longitude,
+                                distanceToRoute
+                            )
+                            if (distanceToRoute[0] <= distanceThresholdMeters) nearestPoint else originalLatLng
+                        } else {
+                            originalLatLng
+                        }
 
-                    lastLocation?.let { lastLoc ->
-                        val resultArray = FloatArray(1)
-                        Location.distanceBetween(
-                            lastLoc.latitude, lastLoc.longitude,
-                            location.latitude, location.longitude,
-                            resultArray
-                        )
-                        totalDistance += resultArray[0]
+                        withContext(Dispatchers.Main) {
+                            runningPath.add(correctedLatLng)
+
+                            if (pathPolyline == null) {
+                                pathPolyline = mMap.addPolyline(
+                                    PolylineOptions()
+                                        .add(correctedLatLng)
+                                        .color(0xFF00FF00.toInt())
+                                        .width(8f)
+                                )
+                            } else {
+                                pathPolyline?.points = runningPath
+                            }
+
+                            lastLocation?.let { lastLoc ->
+                                val resultArray = FloatArray(1)
+                                Location.distanceBetween(
+                                    lastLoc.latitude, lastLoc.longitude,
+                                    location.latitude, location.longitude,
+                                    resultArray
+                                )
+                                totalDistance += resultArray[0]
+                            }
+                            lastLocation = location
+                        }
                     }
-                    lastLocation = location
                 }
             }
         }
+    }
+
+
+    // 🔽 GPS 보정용 함수 추가
+    private fun findNearestPointOnRoute(current: LatLng, route: List<LatLng>): LatLng {
+        var minDistance = Double.MAX_VALUE
+        var closestPoint = route[0]
+
+        for (point in route) {
+            val results = FloatArray(1)
+            Location.distanceBetween(
+                current.latitude, current.longitude,
+                point.latitude, point.longitude,
+                results
+            )
+            if (results[0] < minDistance) {
+                minDistance = results[0].toDouble()
+                closestPoint = point
+            }
+        }
+        return closestPoint
     }
 
     private val timerRunnable = object : Runnable {
@@ -303,5 +354,12 @@ class RunningActivity : BaseActivity(), OnMapReadyCallback {
     override fun onPause() {
         super.onPause()
         fusedLocationClient.removeLocationUpdates(locationCallback)
+        handler.removeCallbacks(timerRunnable)
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        cancel() // CoroutineScope 해제
+    }
+
 }
