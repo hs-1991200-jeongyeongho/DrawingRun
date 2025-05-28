@@ -8,17 +8,31 @@ import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.provider.MediaStore
+import android.view.Gravity
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
+import androidx.core.view.WindowCompat
+import java.io.File
+import java.io.FileOutputStream
 
 class WorkoutResultActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_workout_summary)
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+
+        val shareButton = findViewById<ImageView>(R.id.btn_share)
+        shareButton.setOnClickListener {
+            shareImage()
+        }
 
         val imagePath = intent.getStringExtra("imagePath")
         val time = intent.getStringExtra("time") ?: "00:00"
@@ -90,6 +104,37 @@ class WorkoutResultActivity : AppCompatActivity() {
                 .show()
         }
     }
+
+    private fun shareImage() {
+        val imageView = findViewById<ImageView>(R.id.resultImage)
+        val drawable = imageView.drawable as? BitmapDrawable
+        val bitmap = drawable?.bitmap ?: return
+
+        // 임시 파일로 저장
+        val filename = "shared_image_${System.currentTimeMillis()}.png"
+        val file = File(cacheDir, filename)
+        FileOutputStream(file).use {
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+        }
+
+        // FileProvider를 통해 안전하게 URI 생성
+        val uri = FileProvider.getUriForFile(
+            this,
+            "${packageName}.fileprovider",  // AndroidManifest에 등록한 provider 이름
+            file
+        )
+
+        // 공유 Intent 생성
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "image/png"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+
+        // 앱 목록 보여주기
+        startActivity(Intent.createChooser(shareIntent, "이미지 공유"))
+    }
+
 
     private fun saveBitmapToGallery(bitmap: Bitmap, filename: String): android.net.Uri? {
         val contentValues = ContentValues().apply {
