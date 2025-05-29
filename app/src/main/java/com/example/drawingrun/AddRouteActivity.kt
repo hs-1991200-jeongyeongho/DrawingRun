@@ -27,7 +27,7 @@ class AddRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var drawButton: ImageButton
     private lateinit var deleteButton: ImageButton
-    private lateinit var panButton: ImageButton  // 손 버튼 추가
+    private lateinit var panButton: ImageButton
     private lateinit var saveButton: ImageButton
 
     private val firestore = FirebaseFirestore.getInstance()
@@ -42,10 +42,9 @@ class AddRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
         touchOverlayView = findViewById(R.id.touchOverlay)
 
-        // 🔸 ImageButton으로 타입 맞추기
         drawButton = findViewById(R.id.btnDraw)
         deleteButton = findViewById(R.id.btnDelete)
-        panButton = findViewById(R.id.btnPan)  // 이동 버튼
+        panButton = findViewById(R.id.btnPan)
         saveButton = findViewById(R.id.btnSave)
 
         touchOverlayView.mode = Mode.NONE
@@ -62,7 +61,7 @@ class AddRouteActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         panButton.setOnClickListener {
-            touchOverlayView.mode = Mode.NONE  // 이동 모드는 별도 동작 없고 터치 비활성화
+            touchOverlayView.mode = Mode.NONE
             updateButtonUI()
         }
 
@@ -73,11 +72,13 @@ class AddRouteActivity : AppCompatActivity(), OnMapReadyCallback {
                 return@setOnClickListener
             }
 
+            // ✅ RDP 적용
+            val simplifiedPoints = rdpSimplify(allPoints, 0.001)
+
             showLabelSelectionBottomSheet { label, labelKr, iconUrl ->
-                val geoPoints = allPoints.map { GeoPoint(it.latitude, it.longitude) }
+                val geoPoints = simplifiedPoints.map { GeoPoint(it.latitude, it.longitude) }
                 val userId = auth.currentUser?.uid ?: "unknown_user"
 
-                // ✅ 거리 계산
                 val distanceKm = calculateDistanceKm(geoPoints)
 
                 val routeData = hashMapOf(
@@ -87,7 +88,7 @@ class AddRouteActivity : AppCompatActivity(), OnMapReadyCallback {
                     "label_kr" to labelKr,
                     "iconUrl" to iconUrl,
                     "createdAt" to Timestamp.now(),
-                    "distance" to distanceKm  // 🔸 여기 추가!
+                    "distance" to distanceKm
                 )
 
                 firestore.collection("routes")
@@ -103,7 +104,6 @@ class AddRouteActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
 
-
         val helpButton = findViewById<ImageButton>(R.id.btnHelp)
         helpButton.setOnClickListener {
             val dialog = Dialog(this)
@@ -114,14 +114,10 @@ class AddRouteActivity : AppCompatActivity(), OnMapReadyCallback {
                 R.drawable.help1,
                 R.drawable.help2,
                 R.drawable.help3,
-                R.drawable.help4
-            )
-            val adapter = HelpImageAdapter(images)
-            viewPager.adapter = adapter
+                R.drawable.help4)
+            viewPager.adapter = HelpImageAdapter(images)
 
-
-            val btnClose = dialog.findViewById<ImageButton>(R.id.btnClose)
-            btnClose.setOnClickListener { dialog.dismiss() }
+            dialog.findViewById<ImageButton>(R.id.btnClose).setOnClickListener { dialog.dismiss() }
 
             dialog.show()
 
@@ -131,26 +127,6 @@ class AddRouteActivity : AppCompatActivity(), OnMapReadyCallback {
             )
         }
     }
-
-    private fun calculateDistanceKm(points: List<GeoPoint>): Double {
-        var total = 0.0
-        for (i in 0 until points.size - 1) {
-            val p1 = points[i]
-            val p2 = points[i + 1]
-            total += haversine(p1.latitude, p1.longitude, p2.latitude, p2.longitude)
-        }
-        return String.format("%.3f", total).toDouble() // 소수점 3자리 반올림
-    }
-
-    private fun haversine(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
-        val R = 6371.0
-        val dLat = Math.toRadians(lat2 - lat1)
-        val dLon = Math.toRadians(lon2 - lon1)
-        val a = sin(dLat / 2).pow(2) + cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) * sin(dLon / 2).pow(2)
-        val c = 2 * atan2(sqrt(a), sqrt(1 - a))
-        return R * c
-    }
-
 
     override fun onMapReady(map: GoogleMap) {
         mMap = map
@@ -173,6 +149,64 @@ class AddRouteActivity : AppCompatActivity(), OnMapReadyCallback {
         panButton.setColorFilter(if (touchOverlayView.mode == Mode.NONE) activeColor else inactiveColor)
     }
 
+    private fun calculateDistanceKm(points: List<GeoPoint>): Double {
+        var total = 0.0
+        for (i in 0 until points.size - 1) {
+            val p1 = points[i]
+            val p2 = points[i + 1]
+            total += haversine(p1.latitude, p1.longitude, p2.latitude, p2.longitude)
+        }
+        return String.format("%.3f", total).toDouble()
+    }
+
+    private fun haversine(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+        val R = 6371.0
+        val dLat = Math.toRadians(lat2 - lat1)
+        val dLon = Math.toRadians(lon2 - lon1)
+        val a = sin(dLat / 2).pow(2) + cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) * sin(dLon / 2).pow(2)
+        val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+        return R * c
+    }
+
+    // ✅ RDP 알고리즘 함수들
+    private fun rdpSimplify(points: List<LatLng>, epsilon: Double): List<LatLng> {
+        if (points.size < 3) return points
+
+        val first = points.first()
+        val last = points.last()
+        var maxDistance = 0.0
+        var index = 0
+
+        for (i in 1 until points.size - 1) {
+            val distance = perpendicularDistance(points[i], first, last)
+            if (distance > maxDistance) {
+                index = i
+                maxDistance = distance
+            }
+        }
+
+        return if (maxDistance > epsilon) {
+            val left = rdpSimplify(points.subList(0, index + 1), epsilon)
+            val right = rdpSimplify(points.subList(index, points.size), epsilon)
+            (left.dropLast(1) + right)
+        } else {
+            listOf(first, last)
+        }
+    }
+
+    private fun perpendicularDistance(p: LatLng, start: LatLng, end: LatLng): Double {
+        val dx = end.longitude - start.longitude
+        val dy = end.latitude - start.latitude
+        if (dx == 0.0 && dy == 0.0) {
+            return haversine(p.latitude, p.longitude, start.latitude, start.longitude)
+        }
+
+        val t = ((p.longitude - start.longitude) * dx + (p.latitude - start.latitude) * dy) / (dx * dx + dy * dy)
+        val projLat = start.latitude + t * dy
+        val projLng = start.longitude + t * dx
+        return haversine(p.latitude, p.longitude, projLat, projLng)
+    }
+
     private fun showLabelSelectionBottomSheet(
         onResult: (label: String, labelKr: String, iconUrl: String) -> Unit
     ) {
@@ -190,7 +224,7 @@ class AddRouteActivity : AppCompatActivity(), OnMapReadyCallback {
             val items = snapshot.mapNotNull { doc ->
                 val id = doc.id.removePrefix("icon_")
                 val url = doc.getString("iconURL") ?: return@mapNotNull null
-                val labelKr = doc.getString("label_kr") ?: id  // 없으면 영어 아이디로 fallback
+                val labelKr = doc.getString("label_kr") ?: id
                 LabelAdapter.LabelItem(id, labelKr, url)
             }
 
@@ -199,7 +233,7 @@ class AddRouteActivity : AppCompatActivity(), OnMapReadyCallback {
             val adapter = LabelAdapter(
                 items = items,
                 onClick = { selectedItem = it },
-                showAddButton = false // 이러면 아예 추가 버튼 안 뜸
+                showAddButton = false
             )
             recyclerView.adapter = adapter
 
@@ -221,7 +255,6 @@ class AddRouteActivity : AppCompatActivity(), OnMapReadyCallback {
             )
             bottomSheet?.layoutParams?.height = (resources.displayMetrics.heightPixels * 0.60).toInt()
 
-            // 🔽 추가: 내부 최상단 뷰도 강제로 높이 재설정
             val root = dialog.findViewById<LinearLayout>(R.id.bottom_sheet_root)
             root?.layoutParams?.height = (resources.displayMetrics.heightPixels * 0.60).toInt()
         }
