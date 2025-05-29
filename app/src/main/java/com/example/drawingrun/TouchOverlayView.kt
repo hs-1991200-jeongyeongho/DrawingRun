@@ -77,8 +77,8 @@ class TouchOverlayView @JvmOverloads constructor(
         }
 
         if (mode == Mode.DELETE && deleteTouchPoint != null) {
-            val radius = getDeleteRadius()
-            canvas.drawCircle(deleteTouchPoint!!.x, deleteTouchPoint!!.y, radius, deleteCirclePaint)
+            val visualRadius = getDeleteRadius() * 1.1f // 빨간 원은 1.1배 크게
+            canvas.drawCircle(deleteTouchPoint!!.x, deleteTouchPoint!!.y, visualRadius, deleteCirclePaint)
         }
     }
 
@@ -117,43 +117,36 @@ class TouchOverlayView @JvmOverloads constructor(
             Mode.DELETE -> {
                 if (event.action == MotionEvent.ACTION_DOWN || event.action == MotionEvent.ACTION_MOVE) {
                     deleteTouchPoint = PointF(x, y)
-                    val radiusPixels = getDeleteRadius()
-                    val latLngTouch = proj.fromScreenLocation(Point(x.toInt(), y.toInt()))
+                    val radiusPixels = getDeleteRadius() * 0.8f // 실제 삭제는 0.8배 작게
+                    val touchLatLng = proj.fromScreenLocation(Point(x.toInt(), y.toInt()))
 
                     val newPathSegments = mutableListOf<MutableList<LatLng>>()
 
                     for (segment in pathSegments) {
-                        var tempSegment = mutableListOf<LatLng>()
+                        if (segment.isEmpty()) continue
+                        val startScreen = proj.toScreenLocation(segment.first())
+                        val endScreen = proj.toScreenLocation(segment.last())
 
-                        // 화면 좌표로 변환해 놓기 (최적화)
-                        val segmentScreenPoints = segment.map { proj.toScreenLocation(it) }
+                        val distToStart = distance(deleteTouchPoint!!, PointF(startScreen.x.toFloat(), startScreen.y.toFloat()))
+                        val distToEnd = distance(deleteTouchPoint!!, PointF(endScreen.x.toFloat(), endScreen.y.toFloat()))
 
-                        for (i in segment.indices) {
-                            val screenPt = segmentScreenPoints[i]
-
-                            // 픽셀 거리 계산 - 빠름
-                            val distPixels = distance(deleteTouchPoint!!, PointF(screenPt.x.toFloat(), screenPt.y.toFloat()))
-
-                            if (distPixels > radiusPixels) {
-                                tempSegment.add(segment[i])
-                            } else {
-                                // 픽셀 거리 내에 있으면 위도/경도 미터 단위 정확한 거리 재서 2중 필터링
-                                val distMeters = distanceInMeters(latLngTouch, segment[i])
-                                if (distMeters > getDeleteRadiusInMeters(proj, x, y)) {
-                                    tempSegment.add(segment[i])
-                                } else {
-                                    // 삭제 영역 안에 들어가면 segment 자르기
-                                    if (tempSegment.size >= 2) {
-                                        newPathSegments.add(tempSegment)
-                                    }
-                                    tempSegment = mutableListOf()
-                                }
+                        val mutableSegment = segment.toMutableList()
+                        when {
+                            distToEnd <= radiusPixels -> {
+                                // 끝점이 삭제 반경 안에 있으면 삭제 반경만큼 부드럽게 지우기
+                                removeFromEndWithRadiusSmooth(mutableSegment, radiusPixels, proj)
+                            }
+                            distToStart <= radiusPixels -> {
+                                // 시작점이 삭제 반경 안에 있으면 삭제 반경만큼 부드럽게 지우기
+                                removeFromStartWithRadiusSmooth(mutableSegment, radiusPixels, proj)
                             }
                         }
-                        if (tempSegment.size >= 2) {
-                            newPathSegments.add(tempSegment)
+
+                        if (mutableSegment.size >= 2) {
+                            newPathSegments.add(mutableSegment)
                         }
                     }
+
                     pathSegments.clear()
                     pathSegments.addAll(newPathSegments)
                     invalidate()
@@ -165,6 +158,63 @@ class TouchOverlayView @JvmOverloads constructor(
             }
         }
         return super.onTouchEvent(event)
+    }
+
+    // 부드러운 보간 삭제: 끝점부터
+    private fun removeFromEndWithRadiusSmooth(segment: MutableList<LatLng>, radiusPixels: Float, proj: Projection) {
+        var remainingRadiusMeters = pixelsToMeters(radiusPixels, segment.last(), proj)
+        val stepMeters = 0.5 // 0.5m 단위로 쪼개서 보간 (보간 점 간격)
+
+        while (segment.size > 1 && remainingRadiusMeters > 0) {
+            val last = segment.last()
+            val secondLast = segment[segment.size - 2]
+            val dist = distanceInMeters(secondLast, last)
+
+            if (dist <= stepMeters) {
+                // 점 제거
+                segment.removeAt(segment.size - 1)
+                remainingRadiusMeters -= dist
+            } else {
+                // 일정 step 거리만큼 보간해서 새로운 끝점 생성
+                val ratio = stepMeters / dist
+                val newLat = secondLast.latitude + (last.latitude - secondLast.latitude) * ratio
+                val newLng = secondLast.longitude + (last.longitude - secondLast.longitude) * ratio
+                segment[segment.size - 1] = LatLng(newLat, newLng)
+                remainingRadiusMeters -= stepMeters
+            }
+        }
+    }
+
+    // 부드러운 보간 삭제: 시작점부터
+    private fun removeFromStartWithRadiusSmooth(segment: MutableList<LatLng>, radiusPixels: Float, proj: Projection) {
+        var remainingRadiusMeters = pixelsToMeters(radiusPixels, segment.first(), proj)
+        val stepMeters = 1.0 // 1m 단위로 쪼개서 보간 (값 조절 가능)
+
+        while (segment.size > 1 && remainingRadiusMeters > 0) {
+            val first = segment.first()
+            val second = segment[1]
+            val dist = distanceInMeters(first, second)
+
+            if (dist <= stepMeters) {
+                // 점 제거
+                segment.removeAt(0)
+                remainingRadiusMeters -= dist
+            } else {
+                // 일정 step 거리만큼 보간해서 새로운 시작점 생성
+                val ratio = stepMeters / dist
+                val newLat = first.latitude + (second.latitude - first.latitude) * ratio
+                val newLng = first.longitude + (second.longitude - first.longitude) * ratio
+                segment[0] = LatLng(newLat, newLng)
+                remainingRadiusMeters -= stepMeters
+            }
+        }
+    }
+
+    private fun pixelsToMeters(pixels: Float, latLng: LatLng, proj: Projection): Double {
+        val center = proj.toScreenLocation(latLng)
+        val edge = Point((center.x + pixels).toInt(), center.y)
+        val latLngEdge = proj.fromScreenLocation(edge)
+        return distanceInMeters(latLng, latLngEdge)
     }
 
     fun getAllPoints(): List<LatLng> = pathSegments.flatten()
@@ -185,16 +235,10 @@ class TouchOverlayView @JvmOverloads constructor(
         val zoom = map?.cameraPosition?.zoom ?: 15f
         return when {
             zoom >= 18 -> 40f
-            zoom >= 16 -> 60f
-            zoom >= 14 -> 80f
-            else -> 100f
+            zoom >= 16 -> 50f
+            zoom >= 14 -> 60f
+            else -> 80f
         }
-    }
-
-    private fun getDeleteRadiusInMeters(proj: Projection, x: Float, y: Float): Double {
-        val center = proj.fromScreenLocation(Point(x.toInt(), y.toInt()))
-        val edge = proj.fromScreenLocation(Point((x + getDeleteRadius()).toInt(), y.toInt()))
-        return distanceInMeters(center, edge)
     }
 
     fun onMapMoved() {
