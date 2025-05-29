@@ -5,6 +5,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <ImageButton
+        android:id="@+id/btnHelp"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_gravity="top|end"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_help"
+        android:contentDescription="도움말"
+        android:elevation="6dp" />
+
     <!-- 지도 -->
     <fragment
         android:id="@+id/map"

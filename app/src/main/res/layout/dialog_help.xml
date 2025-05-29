@@ -1,0 +1,42 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_dialog_rounded"
+    android:padding="10dp">
+
+    <!-- 내부 전체 레이아웃 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="12dp"> <!-- 상단 여백 확보 -->
+
+        <TextView
+            android:id="@+id/helpText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="화면을 좌우로 넘겨보세요"
+            android:gravity="center"
+            android:textSize="14sp" />
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/helpViewPager"
+            android:layout_width="match_parent"
+            android:paddingTop="12dp"
+            android:layout_height="650dp" />
+
+    </LinearLayout>
+
+    <!-- 우측 상단 X 버튼 -->
+    <ImageButton
+        android:id="@+id/btnClose"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="top|end"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="4dp"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        android:contentDescription="닫기"
+        app:tint="#212121" />
+</FrameLayout>

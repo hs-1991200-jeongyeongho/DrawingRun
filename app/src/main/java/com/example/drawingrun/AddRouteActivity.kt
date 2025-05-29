@@ -16,6 +16,8 @@ import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
+import android.app.Dialog
+import androidx.viewpager2.widget.ViewPager2
 
 class AddRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -95,6 +97,33 @@ class AddRouteActivity : AppCompatActivity(), OnMapReadyCallback {
                     }
             }
         }
+
+        val helpButton = findViewById<ImageButton>(R.id.btnHelp)
+        helpButton.setOnClickListener {
+            val dialog = Dialog(this)
+            dialog.setContentView(R.layout.dialog_help)
+
+            val viewPager = dialog.findViewById<ViewPager2>(R.id.helpViewPager)
+            val images = intArrayOf(
+                R.drawable.help1,
+                R.drawable.help2,
+                R.drawable.help3,
+                R.drawable.help4
+            )
+            val adapter = HelpImageAdapter(images)
+            viewPager.adapter = adapter
+
+
+            val btnClose = dialog.findViewById<ImageButton>(R.id.btnClose)
+            btnClose.setOnClickListener { dialog.dismiss() }
+
+            dialog.show()
+
+            dialog.window?.setLayout(
+                (resources.displayMetrics.widthPixels * 0.99).toInt(),
+                (resources.displayMetrics.heightPixels * 0.95).toInt()
+            )
+        }
     }
 
 
@@ -159,6 +188,17 @@ class AddRouteActivity : AppCompatActivity(), OnMapReadyCallback {
                     Toast.makeText(this, "아이콘과 라벨 이름을 선택해주세요", Toast.LENGTH_SHORT).show()
                 }
             }
+        }
+
+        dialog.setOnShowListener {
+            val bottomSheet = dialog.findViewById<FrameLayout>(
+                com.google.android.material.R.id.design_bottom_sheet
+            )
+            bottomSheet?.layoutParams?.height = (resources.displayMetrics.heightPixels * 0.60).toInt()
+
+            // 🔽 추가: 내부 최상단 뷰도 강제로 높이 재설정
+            val root = dialog.findViewById<LinearLayout>(R.id.bottom_sheet_root)
+            root?.layoutParams?.height = (resources.displayMetrics.heightPixels * 0.60).toInt()
         }
 
         dialog.show()

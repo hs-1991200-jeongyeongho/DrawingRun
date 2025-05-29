@@ -131,6 +131,7 @@
         override fun onMapReady(googleMap: GoogleMap) {
             mMap = googleMap
             mMap.uiSettings.isZoomControlsEnabled = true
+            mMap.setMaxZoomPreference(18.5f);
 
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 mMap.isMyLocationEnabled = true

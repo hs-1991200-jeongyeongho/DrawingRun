@@ -1,8 +1,11 @@
 package com.example.drawingrun
 
 import android.app.AlertDialog
+import android.content.ContentUris
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Button
@@ -11,6 +14,9 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -34,6 +40,7 @@ class ProfileActivity : AppCompatActivity() {
         editProfileLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
                 loadUserProfile()
+                loadSavedImagesIntoRecyclerView()
             }
         }
 
@@ -57,6 +64,7 @@ class ProfileActivity : AppCompatActivity() {
         }
 
         loadUserProfile()
+        loadSavedImagesIntoRecyclerView()
     }
 
     private fun loadUserProfile() {
@@ -101,6 +109,42 @@ class ProfileActivity : AppCompatActivity() {
             else -> super.onOptionsItemSelected(item)
         }
     }
+
+    private fun loadSavedImagesIntoRecyclerView() {
+        val projection = arrayOf(
+            MediaStore.Images.Media._ID,
+            MediaStore.Images.Media.RELATIVE_PATH
+        )
+        val selection = "${MediaStore.Images.Media.RELATIVE_PATH} LIKE ?"
+        val selectionArgs = arrayOf("%Pictures/DrawingRun%")
+        val sortOrder = "${MediaStore.Images.Media.DATE_ADDED} DESC"
+
+        val imageUris = mutableListOf<Uri>()
+        val cursor = contentResolver.query(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            projection,
+            selection,
+            selectionArgs,
+            sortOrder
+        )
+
+        cursor?.use {
+            val idColumn = it.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
+
+            while (it.moveToNext()) {
+                val id = it.getLong(idColumn)
+                val uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
+                imageUris.add(uri)
+            }
+        }
+
+        val recyclerView = findViewById<RecyclerView>(R.id.rvSavedImages)
+        recyclerView.layoutManager = GridLayoutManager(this, 3)
+        recyclerView.adapter = SavedImageAdapter(imageUris, showAllCallback = {
+            startActivity(Intent(this, AllSavedImagesActivity::class.java))
+        })
+    }
+
 
     private fun showLogoutDialog() {
         val dialog = AlertDialog.Builder(this)
