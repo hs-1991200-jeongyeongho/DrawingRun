@@ -167,7 +167,7 @@
 
                 // ✅ 경로 강조 및 리스트 스크롤
                 routePolylines.forEachIndexed { index, polyline ->
-                    polyline.color = if (polyline == clicked) Color.RED else Color.MAGENTA
+                    polyline.color = if (polyline == clicked) Color.RED else Color.parseColor("#FFB6C1")
                     polyline.width = if (polyline == clicked) 18f else 14f
 
                     if (polyline == clicked) {
@@ -232,7 +232,7 @@
                     .zIndex(9f)
             )
 
-            val loopedPoints = if (points.first() != points.last()) points + points.first() else points
+            val loopedPoints = points
 
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(loopedPoints[0], 17f))
 
@@ -378,7 +378,7 @@
                     val latLngList = geoPoints.map { LatLng(it.latitude, it.longitude) }
 
                     val polyline = mMap.addPolyline(
-                        PolylineOptions().addAll(latLngList).color(Color.MAGENTA).width(14f).clickable(true)
+                        PolylineOptions().addAll(latLngList).color(Color.parseColor("#FFB6C1")).width(14f).clickable(true)
                     )
                     polyline.tag = doc.id
                     routePolylines.add(polyline)
@@ -411,7 +411,7 @@
 
                     selectedRouteFromList = null
                     routePolylines.forEach {
-                        it.color = Color.MAGENTA
+                        it.color = Color.parseColor("#FFB6C1")
                         it.width = 14f
                         if (it.points == selectedItem.points) {
                             it.color = Color.RED
@@ -462,7 +462,7 @@
                         val polyline = mMap.addPolyline(
                             PolylineOptions()
                                 .addAll(latLngList)
-                                .color(Color.MAGENTA)
+                                .color(Color.parseColor("#FFB6C1"))
                                 .width(14f)
                                 .clickable(true)
                         )
@@ -496,7 +496,7 @@
 
                         selectedRouteFromList = null
                         routePolylines.forEach {
-                            it.color = Color.MAGENTA
+                            it.color = Color.parseColor("#FFB6C1")
                             it.width = 14f
                             if (it.points == selectedItem.points) {
                                 it.color = Color.RED

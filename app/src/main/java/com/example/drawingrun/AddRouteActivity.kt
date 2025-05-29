@@ -18,6 +18,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import android.app.Dialog
 import androidx.viewpager2.widget.ViewPager2
+import kotlin.math.*
 
 class AddRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -76,13 +77,17 @@ class AddRouteActivity : AppCompatActivity(), OnMapReadyCallback {
                 val geoPoints = allPoints.map { GeoPoint(it.latitude, it.longitude) }
                 val userId = auth.currentUser?.uid ?: "unknown_user"
 
+                // ✅ 거리 계산
+                val distanceKm = calculateDistanceKm(geoPoints)
+
                 val routeData = hashMapOf(
                     "points" to geoPoints,
                     "userId" to userId,
                     "label" to label,
                     "label_kr" to labelKr,
                     "iconUrl" to iconUrl,
-                    "createdAt" to Timestamp.now()
+                    "createdAt" to Timestamp.now(),
+                    "distance" to distanceKm  // 🔸 여기 추가!
                 )
 
                 firestore.collection("routes")
@@ -97,6 +102,7 @@ class AddRouteActivity : AppCompatActivity(), OnMapReadyCallback {
                     }
             }
         }
+
 
         val helpButton = findViewById<ImageButton>(R.id.btnHelp)
         helpButton.setOnClickListener {
@@ -124,6 +130,25 @@ class AddRouteActivity : AppCompatActivity(), OnMapReadyCallback {
                 (resources.displayMetrics.heightPixels * 0.95).toInt()
             )
         }
+    }
+
+    private fun calculateDistanceKm(points: List<GeoPoint>): Double {
+        var total = 0.0
+        for (i in 0 until points.size - 1) {
+            val p1 = points[i]
+            val p2 = points[i + 1]
+            total += haversine(p1.latitude, p1.longitude, p2.latitude, p2.longitude)
+        }
+        return String.format("%.3f", total).toDouble() // 소수점 3자리 반올림
+    }
+
+    private fun haversine(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+        val R = 6371.0
+        val dLat = Math.toRadians(lat2 - lat1)
+        val dLon = Math.toRadians(lon2 - lon1)
+        val a = sin(dLat / 2).pow(2) + cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) * sin(dLon / 2).pow(2)
+        val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+        return R * c
     }
 
 
