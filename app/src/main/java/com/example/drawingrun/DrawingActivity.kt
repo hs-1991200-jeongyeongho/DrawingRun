@@ -453,35 +453,68 @@
                     }
 
                     // 🔸 어댑터 세팅
-                    routeInfoAdapter = RouteInfoItemAdapter(routeItems) { selectedItem ->
-                        val boundsBuilder = LatLngBounds.Builder()
-                        selectedItem.points.forEach { boundsBuilder.include(it) }
-                        val bounds = boundsBuilder.build()
-                        val padding = 250
+                    routeInfoAdapter = RouteInfoItemAdapter(
+                        routeItems,
+                        onClick = { selectedItem ->
+                            val boundsBuilder = LatLngBounds.Builder()
+                            selectedItem.points.forEach { boundsBuilder.include(it) }
+                            val bounds = boundsBuilder.build()
+                            val padding = 250
 
-                        (supportFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment)?.view?.post {
-                            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding))
-                        }
+                            (supportFragmentManager.findFragmentById(R.id.map) as? SupportMapFragment)?.view?.post {
+                                mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding))
+                            }
 
-                        selectedRouteFromList = null
-                        routePolylines.forEach {
-                            it.color = Color.parseColor("#FFB6C1")
-                            it.width = 14f
-                            if (it.points == selectedItem.points) {
-                                it.color = Color.RED
-                                it.width = 18f
-                                selectedRouteFromList = it
+                            selectedRouteFromList = null
+                            routePolylines.forEach {
+                                it.color = Color.parseColor("#FFB6C1")
+                                it.width = 14f
+                                if (it.points == selectedItem.points) {
+                                    it.color = Color.RED
+                                    it.width = 18f
+                                    selectedRouteFromList = it
+                                }
+                            }
+
+                            selectedRoutePoints = selectedItem.points
+
+                            val selectedIndex = routeItems.indexOfFirst { it.points == selectedItem.points }
+                            val layoutManager = routeInfoRecycler.layoutManager as? LinearLayoutManager
+                            layoutManager?.scrollToPositionWithOffset(selectedIndex, 100)
+
+                            startMockRunningAnimation(selectedItem.points)
+                        },
+                        onDelete = { item ->
+                            if (item.isMine) {
+                                val targetPolyline = routePolylines.firstOrNull { it.points == item.points }
+                                val docId = targetPolyline?.tag as? String
+
+                                if (docId != null) {
+                                    db.collection("routes").document(docId)
+                                        .delete()
+                                        .addOnSuccessListener {
+                                            Toast.makeText(this, "경로가 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+
+                                            // 지도에서 제거
+                                            targetPolyline?.remove()
+                                            routePolylines.remove(targetPolyline)
+
+                                            // 어댑터에서 제거
+                                            routeInfoAdapter?.removeItem(item)
+
+                                            if (selectedRoutePoints == item.points) {
+                                                selectedRoutePoints = null
+                                                selectedRoute = null
+                                                selectedRouteFromList = null
+                                            }
+                                        }
+                                        .addOnFailureListener {
+                                            Toast.makeText(this, "삭제에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                                        }
+                                }
                             }
                         }
-
-                        selectedRoutePoints = selectedItem.points
-
-                        val selectedIndex = routeItems.indexOfFirst { it.points == selectedItem.points }
-                        val layoutManager = routeInfoRecycler.layoutManager as? LinearLayoutManager
-                        layoutManager?.scrollToPositionWithOffset(selectedIndex, 100)
-
-                        startMockRunningAnimation(selectedItem.points)
-                    }
+                    )
 
                     routeInfoRecycler.adapter = routeInfoAdapter
 
