@@ -8,26 +8,46 @@
     app:cardElevation="4dp"
     app:cardBackgroundColor="@android:color/white">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- 내 경로 뱃지 -->
+        <TextView
+            android:id="@+id/my_route_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="내 경로"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
+            android:background="@drawable/bg_my_route_badge"
+            android:textColor="@android:color/white"
+            android:visibility="gone"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true" />
+
+        <!-- 타이틀 -->
         <TextView
             android:id="@+id/route_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="#000000" />
+            android:textColor="#000000"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true" />
 
+        <!-- 설명 -->
         <TextView
             android:id="@+id/route_description"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="14sp"
             android:textColor="#444444"
-            android:layout_marginTop="4dp" />
-    </LinearLayout>
+            android:layout_below="@id/route_title"
+            android:layout_marginTop="8dp" />
+    </RelativeLayout>
 </androidx.cardview.widget.CardView>
