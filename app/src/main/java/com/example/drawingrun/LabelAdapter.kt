@@ -13,7 +13,8 @@ import com.bumptech.glide.Glide
 class LabelAdapter(
     private val items: List<LabelItem>,
     private val onClick: (LabelItem) -> Unit,
-    private val onAddClick: () -> Unit // 🔹 + 버튼 클릭 시 처리
+    private val onAddClick: (() -> Unit)? = null, // 🔹 + 버튼 클릭 시 처리
+    private val showAddButton: Boolean = true
 ) : RecyclerView.Adapter<LabelAdapter.LabelViewHolder>() {
 
     data class LabelItem(val label: String, val labelKr: String, val iconUrl: String)
@@ -84,10 +85,10 @@ class LabelAdapter(
             holder.frame.setBackgroundColor(Color.WHITE)
 
             holder.frame.setOnClickListener {
-                onAddClick()
+                onAddClick?.invoke()
             }
         }
     }
 
-    override fun getItemCount(): Int = items.size + 1 // 🔹 마지막에 + 버튼 포함
+    override fun getItemCount(): Int = items.size + if (showAddButton) 1 else 0 // 🔹 마지막에 + 버튼 포함
 }

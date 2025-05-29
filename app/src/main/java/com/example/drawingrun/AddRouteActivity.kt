@@ -198,8 +198,8 @@ class AddRouteActivity : AppCompatActivity(), OnMapReadyCallback {
 
             val adapter = LabelAdapter(
                 items = items,
-                onClick = { item -> selectedItem = item },
-                onAddClick = {} // 사용하지 않음
+                onClick = { selectedItem = it },
+                showAddButton = false // 이러면 아예 추가 버튼 안 뜸
             )
             recyclerView.adapter = adapter
 
