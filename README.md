@@ -17,7 +17,7 @@
 <a href="https://www.flaticon.com/kr/free-icons/" title="구근 아이콘">구근 아이콘 제작자: Anggara - Flaticon</a><br>
 <a href="https://www.flaticon.com/kr/free-icons/" title="자동차 아이콘">자동차 아이콘 제작자: sonnycandra - Flaticon</a><br>
 <a href="https://www.flaticon.com/kr/free-icons/" title="디즈니 아이콘">디즈니 아이콘 제작자: Freepik - Flaticon</a><br>
-<a href="https://www.flaticon.com/kr/free-icons/" title="고양이 아이콘">고양이 아이콘 제작자: Icon Mela - Flaticon</a>
+<a href="https://www.flaticon.com/kr/free-icons/" title="고양이 아이콘">고양이 아이콘 제작자: Icon Mela - Flaticon</a><br>
 <a href="https://www.flaticon.com/kr/free-icons/" title="데스크탑 아이콘">데스크탑 아이콘 제작자: kerismaker - Flaticon</a><br>
 <a href="https://www.flaticon.com/kr/free-icons/" title="왕관 아이콘">왕관 아이콘 제작자: Dewi Sari - Flaticon</a><br>
 <a href="https://www.flaticon.com/kr/free-icons/-" title="개 코 아이콘">개 코 아이콘 제작자: POD Gladiator - Flaticon</a><br>
