@@ -14,10 +14,9 @@
 ## 📚 목차
 
 - [개요](#-개요)
-- [사용 기술](#-사용-기술)
 - [팀원 소개](#-팀원-소개)
 - [주요 기능](#-주요-기능)
-- [작품 구조](#-작품-구조)
+- [프로젝트 구조 및 사용 기술](#-프로젝트-구조-및-사용-기술)
 - [기대효과](#-기대효과)
 - [앱 주요 화면](#-구현-화면)
 - [시연 영상](#-시연-영상)
@@ -37,26 +36,6 @@ GPS 아트는 실시간 위치 기록을 통해 지도 위에 그림을 그리�
 하지만 경로 설계의 복잡함은 초보자에게 진입 장벽이 될 수 있습니다.  
 **DrawingRun**은 이 장벽을 낮추기 위해 저장된 경로를 제공하거나,  
 직접 그려진 경로로 바로 러닝을 시작할 수 있도록 도와줍니다.
-
-
----
-
-## 🛠 사용 기술
-
-### 개발 환경
-![Windows](https://img.shields.io/badge/Windows_10%2F11-0078D6?style=for-the-badge&logo=windows&logoColor=white)
-![Android Studio](https://img.shields.io/badge/Android%20Studio-3DDC84?style=for-the-badge&logo=android-studio&logoColor=white)
-
-### 개발 언어
-![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)
-
-### 개발 도구 & API
-![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
-![Google Maps API](https://img.shields.io/badge/Google%20Maps%20API-4285F4?style=for-the-badge&logo=googlemaps&logoColor=white)
-![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)
-![Figma](https://img.shields.io/badge/Figma-F24E1E?style=for-the-badge&logo=figma&logoColor=white)
-
-
 
 ---
 
@@ -83,11 +62,24 @@ GPS 아트는 실시간 위치 기록을 통해 지도 위에 그림을 그리�
 
 ---
 
-## 🧩 작품 구조
+## 🏗 프로젝트 구조 및 사용 기술
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/1c84f46a-b2f6-47d5-95fd-2ece9626fa54" alt="프로젝트 구조도" width="700"/>
 </p>
+
+### 💻 개발 환경
+![Windows](https://img.shields.io/badge/Windows_10%2F11-0078D6?style=for-the-badge&logo=windows&logoColor=white)
+![Android Studio](https://img.shields.io/badge/Android%20Studio-3DDC84?style=for-the-badge&logo=android-studio&logoColor=white)
+
+### 🧑‍💻 개발 언어
+![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)
+
+### 🛠 개발 도구 & API
+![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
+![Google Maps API](https://img.shields.io/badge/Google%20Maps%20API-4285F4?style=for-the-badge&logo=googlemaps&logoColor=white)
+![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)
+![Figma](https://img.shields.io/badge/Figma-F24E1E?style=for-the-badge&logo=figma&logoColor=white)
 
 ---
 
