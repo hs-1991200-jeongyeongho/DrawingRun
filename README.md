@@ -38,11 +38,21 @@ GPS 아트는 실시간 위치 기록을 통해 지도 위에 그림을 그리�
 
 ---
 
-## 🛠️ 사용 기술
+## 🛠 사용 기술
 
-- **개발 환경**: Windows 10/11, Android Studio
-- **개발 도구**: Firebase Firestore, Firebase Authentication, Firebase Storage, Google Maps API, GitHub, Figma
-- **개발 언어**: Kotlin
+### 💻 개발 환경
+![Windows](https://img.shields.io/badge/Windows_10%2F11-0078D6?style=for-the-badge&logo=windows&logoColor=white)
+![Android Studio](https://img.shields.io/badge/Android%20Studio-3DDC84?style=for-the-badge&logo=android-studio&logoColor=white)
+
+### 🧑‍💻 개발 언어
+![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)
+
+### 🛠 개발 도구 & API
+![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
+![Google Maps API](https://img.shields.io/badge/Google%20Maps%20API-4285F4?style=for-the-badge&logo=googlemaps&logoColor=white)
+![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)
+![Figma](https://img.shields.io/badge/Figma-F24E1E?style=for-the-badge&logo=figma&logoColor=white)
+
 
 
 ---
@@ -86,15 +96,22 @@ GPS 아트는 실시간 위치 기록을 통해 지도 위에 그림을 그리�
 
 ---
 
-## 🎥 시연 영상
+## 📱 Android 시연 영상
 
-[시연 영상 보러 가기](https://youtu.be/YO_AIYwtn2s)
+[![YouTube 버튼](https://github.com/user-attachments/assets/2d75ff29-e853-4575-84c2-06a5543185d2)](https://youtu.be/YO_AIYwtn2s)
+
+
+## 💻 구현 화면
+
+### 📱 Android 앱 화면
+▶️ [click!](https://링크-주소)
 
 ---
 
-## 🖼️ 앱 주요 화면
+| 홈 화면 | 경로 선택 | 러닝 진행 | 결과 저장 |
+|:--:|:--:|:--:|:--:|
+| ![](https://your-image-link1.png) | ![](https://your-image-link2.png) | ![](https://your-image-link3.png) | ![](https://your-image-link4.png) |
 
-![앱 화면](https://your-image-link.com/screenshot1.png)
 
 ---
 
