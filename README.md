@@ -103,17 +103,16 @@ GPS 아트는 실시간 위치 기록을 통해 지도 위에 그림을 그리�
 
 ## 💻 구현 화면
 
-### 📱 Android 앱 화면  
-▶️ [click!](https://github.com/user-attachments/assets/45b22a0a-0ba4-46e4-80f2-23c3ef7e0d0a)
+### 📱 Android 앱 화면
 
----
+<details>
+  <summary>▶️ click! 사진을 누르시면 크게 확인 가능합니다.</summary>
 
-![Android 앱 시연](https://github.com/user-attachments/assets/45b22a0a-0ba4-46e4-80f2-23c3ef7e0d0a)
+  <br>
 
+  <img src="https://github.com/user-attachments/assets/45b22a0a-0ba4-46e4-80f2-23c3ef7e0d0a" alt="Android 앱 화면" width="700"/>
+</details>
 
-| 홈 화면 | 경로 선택 | 러닝 진행 | 결과 저장 |
-|:--:|:--:|:--:|:--:|
-| ![](https://your-image-link1.png) | ![](https://your-image-link2.png) | ![](https://your-image-link3.png) | ![](https://your-image-link4.png) |
 
 
 ---
