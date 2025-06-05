@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="[https://your-uploaded-image-link.png](https://github.com/hs-1991200-jeongyeongho/DrawingRun/issues/1#issue-3120384487)" width="300" alt="DrawingRun 로고"/>
+  <img src="https://github.com/hs-1991200-jeongyeongho/DrawingRun/issues/1#issue-3120384487" width="300" alt="DrawingRun 로고"/>
 </p>
 
 # 🏃 DrawingRun
