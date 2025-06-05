@@ -2,9 +2,13 @@
   <img src="https://github.com/user-attachments/assets/3dd3c7e2-fc8b-4e65-b3ac-c8af00b0ce26" width="200" alt="DrawingRun 로고"/>
 </p>
 
+<div align="center">
+
 # 🏃 DrawingRun
 
-> 사용자가 원하는 모양의 러닝 경로를 제공하는 GPS 기반 애플리케이션
+사용자가 원하는 모양의 러닝 경로를 제공하는 GPS 기반 애플리케이션
+
+</div>
 
 ---
 ## 📚 목차
