@@ -68,14 +68,14 @@ GPS 아트는 실시간 위치 기록을 통해 지도 위에 그림을 그리�
   <img src="https://github.com/user-attachments/assets/1c84f46a-b2f6-47d5-95fd-2ece9626fa54" alt="프로젝트 구조도" width="700"/>
 </p>
 
-### 💻 개발 환경
+### 개발 환경
 ![Windows](https://img.shields.io/badge/Windows_10%2F11-0078D6?style=for-the-badge&logo=windows&logoColor=white)
 ![Android Studio](https://img.shields.io/badge/Android%20Studio-3DDC84?style=for-the-badge&logo=android-studio&logoColor=white)
 
-### 🧑‍💻 개발 언어
+### 개발 언어
 ![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)
 
-### 🛠 개발 도구 & API
+### 개발 도구 & API
 ![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
 ![Google Maps API](https://img.shields.io/badge/Google%20Maps%20API-4285F4?style=for-the-badge&logo=googlemaps&logoColor=white)
 ![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)
