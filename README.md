@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/b83eff25-05c6-427e-8b3f-1808b1e17dd6" width="200" alt="DrawingRun 로고"/>
+  <img src="https://github.com/user-attachments/assets/3dd3c7e2-fc8b-4e65-b3ac-c8af00b0ce26" width="200" alt="DrawingRun 로고"/>
 </p>
 
 # 🏃 DrawingRun
