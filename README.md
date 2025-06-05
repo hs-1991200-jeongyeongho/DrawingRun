@@ -19,8 +19,8 @@
 - [주요 기능](#-주요-기능)
 - [작품 구조 및 결과물](#-작품-구조-및-결과물)
 - [기대효과](#-기대효과)
-- [시연 영상](#-android-시연-영상)
 - [앱 주요 화면](#-구현-화면)
+- [시연 영상](#-시연-영상)
 - [마무리](#-마무리)
 
 
@@ -99,13 +99,6 @@ GPS 아트는 실시간 위치 기록을 통해 지도 위에 그림을 그리�
 
 ---
 
-## 📱 시연 영상
-
-[![YouTube 버튼](https://github.com/user-attachments/assets/2d75ff29-e853-4575-84c2-06a5543185d2)](https://youtu.be/YO_AIYwtn2s)
-
-
----
-
 ## 📱 구현 화면
 
 #### Android 앱 화면
@@ -118,11 +111,16 @@ GPS 아트는 실시간 위치 기록을 통해 지도 위에 그림을 그리�
   <img src="https://github.com/user-attachments/assets/45b22a0a-0ba4-46e4-80f2-23c3ef7e0d0a" alt="Android 앱 화면" width="700"/>
 </details>
 
+---
+
+## 🎬 시연 영상
+
+[![YouTube 버튼](https://github.com/user-attachments/assets/2d75ff29-e853-4575-84c2-06a5543185d2)](https://youtu.be/YO_AIYwtn2s)
 
 
 ---
 
-## 마무리
+## 📌 마무리
 
 **DrawingRun**은 운동의 지속성과 창의성을 결합한 새로운 러닝 방식입니다.  
 누구나 쉽게 접근하고, 나만의 개성을 표현하며 운동을 즐길 수 있는 이 앱은  
@@ -130,15 +128,15 @@ GPS 아트는 실시간 위치 기록을 통해 지도 위에 그림을 그리�
 
 감사합니다!
 
-
 ---
 
 <details>
-  <summary><strong>아이콘 출처 보기</strong></summary>
+  <summary><strong>🎨 아이콘 출처 보기</strong></summary>
 
   <br>
 
-  아이콘 출처는 모두 [Flaticon](https://www.flaticon.com/kr/)이며, 아래와 같습니다:
+  아래는 본 프로젝트에서 사용된 아이콘의 출처입니다.  
+  모든 아이콘은 [Flaticon](https://www.flaticon.com/kr/)에서 제공되었습니다.
 
   <a href="https://www.flaticon.com/kr/free-icons/" title="음표 아이콘">음표 아이콘 제작자: Pixel perfect - Flaticon</a><br>
   <a href="https://www.flaticon.com/kr/free-icons/" title="눈송이 아이콘">눈송이 아이콘 제작자: Freepik - Flaticon</a><br>
