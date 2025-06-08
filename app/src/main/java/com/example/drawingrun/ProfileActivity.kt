@@ -1,5 +1,6 @@
 package com.example.drawingrun
 
+import android.widget.Toast
 import android.app.AlertDialog
 import android.content.ContentUris
 import android.content.Intent
@@ -73,23 +74,28 @@ class ProfileActivity : AppCompatActivity() {
         db.collection("users").document(uid).get()
             .addOnSuccessListener { document ->
                 if (document != null) {
-                    val name = document.getString("name") ?: "이름 없음"
-                    val age = document.getLong("age")?.toString() ?: "미입력"
-                    val height = document.getDouble("height")?.toString() ?: "미입력"
-                    val weight = document.getDouble("weight")?.toString() ?: "미입력"
-                    val distance = document.getDouble("totalDistance") ?: 0.0
+                    try {
+                        val name = AESUtil.decrypt(document.getString("name") ?: "")
+                        val age = AESUtil.decrypt(document.getString("age") ?: "")
+                        val height = AESUtil.decrypt(document.getString("height") ?: "")
+                        val weight = AESUtil.decrypt(document.getString("weight") ?: "")
+                        val distance = document.getDouble("totalDistance") ?: 0.0
 
-                    tvName.text = name
-                    tvAge.text = "나이: $age"
-                    tvHeight.text = "키: $height cm"
-                    tvWeight.text = "몸무게: $weight kg"
-                    tvDistance.text = "누적 달린 거리: %.2f km".format(distance)
+                        tvName.text = name
+                        tvAge.text = "나이: $age"
+                        tvHeight.text = "키: $height cm"
+                        tvWeight.text = "몸무게: $weight kg"
+                        tvDistance.text = "누적 달린 거리: %.2f km".format(distance)
+                    } catch (e: Exception) {
+                        Toast.makeText(this, "복호화 실패", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
             .addOnFailureListener {
-                tvName.text = "불러오기 실패"
+                Toast.makeText(this, "불러오기 실패", Toast.LENGTH_SHORT).show()
             }
     }
+
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_profile, menu)
