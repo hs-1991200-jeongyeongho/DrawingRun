@@ -33,10 +33,10 @@ class UserInfoActivity : AppCompatActivity() {
             }
 
             val user = hashMapOf(
-                "name" to name,
-                "age" to age.toInt(),
-                "height" to height.toInt(),
-                "weight" to weight.toDouble()
+                "name" to AESUtil.encrypt(name),
+                "age" to AESUtil.encrypt(age),
+                "height" to AESUtil.encrypt(height),
+                "weight" to AESUtil.encrypt(weight)
             )
 
             FirebaseFirestore.getInstance()

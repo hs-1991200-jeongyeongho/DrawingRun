@@ -82,5 +82,13 @@
             android:fontFamily="@font/spoqa_han_sans_bold"
             app:cornerRadius="12dp"
             app:backgroundTint="#E65C00" />
+
+        <com.google.android.gms.common.SignInButton
+            android:id="@+id/buttonGoogleLogin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:theme="@style/Theme.MaterialComponents.Light" />
     </LinearLayout>
 </ScrollView>
